@@ -7,6 +7,7 @@
 using namespace std;
 
 void get_URL(const string &host, const string &path) {
+
     // Your code here.
 
     // You will need to connect to the "http" service on
@@ -16,6 +17,45 @@ void get_URL(const string &host, const string &path) {
     // Then you'll need to print out everything the server sends back,
     // (not just one call to read() -- everything) until you reach
     // the "eof" (end of file).
+
+
+
+
+
+    //大约10行代码..
+    //测试 ./apps/webget cs144.keithw.org /hello          //make check webget       //make check
+
+    // How
+    // does this compare to what you see when visiting http://cs144.keithw.org/hello in a
+    // Web browser? How does it compare to the results from Section 2.1? Feel free to
+    // experiment—test it with any http URL you like!
+
+    //实现webget ,  HTTP请求体的格式 , TCPSocket , Address class , 每行结束\r\n
+    //构建http请求体
+    std::string httpString;
+    httpString = "GET "+path+" HTTP/1.0" +"\r\n" +
+                 "Host:"+host +"\r\n";
+    cout <<httpString;
+
+
+    //建立tcp连接
+    TCPSocket tcpSocket = TCPSocket{};
+    Address address = Address{host, "http"};
+    tcpSocket.connect(address);
+
+
+    //发送(write)字节流
+    // write完之后要调用TCPSocket的SHUT WR关掉这个方向的发送 , 否则另一端会等待一段时间才开始处理
+    tcpSocket.write(httpString);
+
+    //接收(read)字节流
+    // read要read到EOF才算结束 , 不能只read一次
+    string bytes;
+    while (!tcpSocket.eof()) {
+        bytes += tcpSocket.read();
+    }
+    cout << bytes;
+    tcpSocket.close();
 
     cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
     cerr << "Warning: get_URL() has not been implemented yet.\n";
