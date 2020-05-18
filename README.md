@@ -8,6 +8,34 @@
 - [ ] Lab6 Router
 
 
+# Lab1总结
+
+1.减少循环内判断, 放到外面减少循环次数
+
+```
+[0,.....size....len)
+[0,.....size)
+[i,.....minSize)
+for i=0;i<len;i++ {
+    if i>=size {
+    break;
+    }
+    //....
+}
+
+//improve:
+minSize = min(len,size);
+for i=0;i<minSize;i++ {
+    //...
+}
+```
+
+
+2.eof是信号
+
+3.作业提供的接口,先想想作为用户是如何使用这些接口
+
+4.还是要先理清楚各种index,边界,开闭区间的含义
 
 
 
