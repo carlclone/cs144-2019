@@ -33,8 +33,15 @@ ByteStream::ByteStream(const size_t capacity) { DUMMY_CODE(capacity); }
  *
  * */
 size_t ByteStream::write(const string &data) {
-    DUMMY_CODE(data);
-    return {};
+    //尽量写入,只有管道里还有空间
+    size_t i;
+    size_t minSize = min(data.size(),remaining_capacity());
+    for ( i=0; i<minSize;i++) {
+        bytesPipe.push_front(data[i]);
+    }
+    bytesWriteTotal+=i;
+    bytesInPipe+=i;
+    return i;
 }
 
 /*
@@ -44,26 +51,38 @@ size_t ByteStream::write(const string &data) {
  */
 //! \param[in] len bytes will be copied from the output side of the buffer
 string ByteStream::peek_output(const size_t len) const {
-    DUMMY_CODE(len);
-    return {};
+    //返回管道中 0到0+len的字节 , 转成字符串
+    size_t minSize = min(len,buffer_size());
+    return string(bytesPipe[0],bytesPipe[minSize]);
 }
 
 //同上
 //! \param[in] len bytes will be removed from the output side of the buffer
-void ByteStream::pop_output(const size_t len) { DUMMY_CODE(len); }
+void ByteStream::pop_output(const size_t len) {
+    size_t minSize = min(len,buffer_size());
+    size_t i;
+    for (i = 0; i < minSize; i++) {
+        bytesPipe.pop_front();
+    }
+    bytesInPipe-=minSize;
+    bytesReadTotal+=minSize;
+    if (bytesInPipe == 0 && input_ended()) {
+        _eof=true;
+    }
+}
 
 
 //`true` if the output has reached the ending
-bool ByteStream::eof() const { return false; }
+bool ByteStream::eof() const { return _eof; }
 size_t ByteStream::bytes_written() const { return bytesWriteTotal; }
 size_t ByteStream::bytes_read() const { return bytesReadTotal; }
 // capcity-buffersize
 size_t ByteStream::remaining_capacity() const { return capcity - buffer_size(); }
 //要记录当前字节长度
-size_t ByteStream::buffer_size() const { return bytesCount; }
+size_t ByteStream::buffer_size() const { return bytesInPipe; }
 //字节长度==0
 bool ByteStream::buffer_empty() const { return buffer_size() == 0; }
 //Signal that the byte stream has reached its ending
-void ByteStream::end_input() { ended = true; }
+void ByteStream::end_input() { _ended = true; }
 //`true` if the stream input has ended
-bool ByteStream::input_ended() const { return ended; }
+bool ByteStream::input_ended() const { return _ended; }
