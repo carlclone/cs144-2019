@@ -16,6 +16,9 @@
 class ByteStream {
   private:
     // Your code here -- add private members as necessary.
+    size_t capcity,bytesCount,bytesReadTotal,bytesWriteTotal;
+    bool ended;
+
 
     bool _error{};  //!< Flag indicating that the stream suffered an error.
 

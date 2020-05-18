@@ -50,6 +50,7 @@ void get_URL(const string &host, const string &path) {
 
     //接收(read)字节流
     // read要read到EOF才算结束 , 不能只read一次
+    //eof是一个信号,不是字符串结尾的特殊字符
     string bytes;
     while (!tcpSocket.eof()) {
         bytes += tcpSocket.read();
