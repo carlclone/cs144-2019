@@ -1,3 +1,18 @@
+
+- [x] Lab0 webget,ByteStream
+- [ ] Lab1 StreamReassembler
+- [ ] Lab2 TCP Receiver
+- [ ] Lab3 TCP Sender
+- [ ] Lab4 TCP Connection
+- [ ] Lab5 NetWork Interface
+- [ ] Lab6 Router
+
+
+
+
+
+
+
 For build prereqs, see [the CS144 VM setup instructions](https://web.stanford.edu/class/cs144/vm_howto).
 
 ## Sponge quickstart
