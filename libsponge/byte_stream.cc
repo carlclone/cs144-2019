@@ -25,7 +25,7 @@ using namespace std;
  *
  * */
 
-ByteStream::ByteStream(const size_t capacity) { DUMMY_CODE(capacity); }
+ByteStream::ByteStream(const size_t capacity) :capcity(capacity),bytesInPipe(0),bytesReadTotal(0),bytesWriteTotal(0),_ended(false),_eof(false),bytesPipe() {}
 
 /*把string转成字节数组,写入stream的管道里
  * 如果满了,报错
