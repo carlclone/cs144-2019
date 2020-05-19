@@ -15,7 +15,7 @@ if index==nextindex
 	lastProvedSegment = bytes
 
 if index < nextIndex 
-    if index+len(bytes) > nextIndex 
+    if index+len(bytes) > nextIndex && partOfMatchLastProvedSegment
         //增量
         newStr = substr(bytes,len(bytes)-nextIndex,-1)
         submitSegment(newStr,nextIndex)
