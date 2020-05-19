@@ -10,7 +10,7 @@
 
 # Lab1总结
 
-1.老师带着我们实现了一个in-memory reliable ordered bystream,做这个的目的是因为tcp实际上就是这样的一个可靠有序的字节流,不过是基于网络的,
+1.实现了一个in-memory reliable ordered bystream,做这个的目的是因为tcp实际上就是这样的一个可靠有序的字节流,不过是基于网络的,
 实现这一个小lab可以更好地理解了tcp两端的一些交互,
 比如说http的请求中,客户端发送完请求后会向服务端发送一个SHUTDOWN_WRITE的 信号,
 就对应byteSteam类的input_ended(),
