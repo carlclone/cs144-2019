@@ -47,6 +47,7 @@ void get_URL(const string &host, const string &path) {
     //发送(write)字节流
     // write完之后要调用TCPSocket的SHUT WR关掉这个方向的发送 , 否则另一端会等待一段时间才开始处理
     tcpSocket.write(httpString);
+    tcpSocket.shutdown(SHUT_WR);
 
     //接收(read)字节流
     // read要read到EOF才算结束 , 不能只read一次
@@ -58,8 +59,8 @@ void get_URL(const string &host, const string &path) {
     cout << bytes;
     tcpSocket.close();
 
-    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
-    cerr << "Warning: get_URL() has not been implemented yet.\n";
+//    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
+//    cerr << "Warning: get_URL() has not been implemented yet.\n";
 }
 
 int main(int argc, char *argv[]) {
