@@ -10,6 +10,17 @@
 
 # Lab1总结
 
+1.老师带着我们实现了一个in-memory reliable ordered bystream,做这个的目的是因为tcp实际上就是这样的一个可靠有序的字节流,不过是基于网络的,
+实现这一个小lab可以更好地理解了tcp两端的一些交互,
+比如说http的请求中,客户端发送完请求后会向服务端发送一个SHUTDOWN_WRITE的 信号,
+就对应byteSteam类的input_ended(),
+这时候服务端就知道,在这个sequence number之后没有新数据了,接收完前面的字节就可以开始处理请求,
+这里的seq number就可以用作eof的判断
+
+2.webget这个task用课程提供的虚拟镜像运行不了,折腾了好久,放到自己的ubuntu16.04里成功运行,越底层的语言开发环境越折磨人
+
+
+
 1.减少循环内判断, 放到外面减少循环次数
 
 ```
@@ -37,9 +48,15 @@ for i=0;i<minSize;i++ {
 
 4.还是要先理清楚各种index,边界,开闭区间的含义
 
+# Lab2
+
+.....
 
 
 
+
+
+# .
 
 For build prereqs, see [the CS144 VM setup instructions](https://web.stanford.edu/class/cs144/vm_howto).
 
