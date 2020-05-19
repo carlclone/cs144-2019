@@ -6,10 +6,12 @@
 
 using namespace std;
 
+//pass
 int main() {
     try {
         {
             ByteStreamTestHarness test{"overwrite", 2};
+
 
             test.execute(Write{"cat"}.with_bytes_written(2));
 
@@ -19,6 +21,7 @@ int main() {
             test.execute(BytesRead{0});
             test.execute(BytesWritten{2});
             test.execute(RemainingCapacity{0});
+
             test.execute(BufferSize{2});
             test.execute(Peek{"ca"});
 
