@@ -9,9 +9,10 @@
 using namespace std;
 
 int main() {
+
     try {
         auto rd = get_random_generator();
-
+        //重复 segment 不写入 stream
         {
             ReassemblerTestHarness test{65000};
 
@@ -25,14 +26,16 @@ int main() {
             test.execute(BytesAvailable(""));
             test.execute(NotAtEof{});
         }
-
+        //一样
         {
             ReassemblerTestHarness test{65000};
+
 
             test.execute(SubmitSegment{"abcd", 0});
             test.execute(BytesAssembled(4));
             test.execute(BytesAvailable("abcd"));
             test.execute(NotAtEof{});
+
 
             test.execute(SubmitSegment{"abcd", 4});
             test.execute(BytesAssembled(8));
@@ -50,6 +53,7 @@ int main() {
             test.execute(NotAtEof{});
         }
 
+        //打乱,不写入?
         {
             ReassemblerTestHarness test{65000};
 
@@ -75,6 +79,7 @@ int main() {
             }
         }
 
+        //写入,增量? 如何判断增量,要记录下上一个 segment 的内容,如果新来的长度溢出 nextIndex , 那就做比对增量
         {
             ReassemblerTestHarness test{65000};
 
@@ -83,6 +88,7 @@ int main() {
             test.execute(BytesAvailable("abcd"));
             test.execute(NotAtEof{});
 
+            //特殊情况
             test.execute(SubmitSegment{"abcdef", 0});
             test.execute(BytesAssembled(6));
             test.execute(BytesAvailable("ef"));
