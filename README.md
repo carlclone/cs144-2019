@@ -1,6 +1,6 @@
 
 - [x] Lab0 webget,ByteStream
-- [ ] Lab1 StreamReassembler
+- [x] Lab1 StreamReassembler
 - [ ] Lab2 TCP Receiver
 - [ ] Lab3 TCP Sender
 - [ ] Lab4 TCP Connection
@@ -8,7 +8,7 @@
 - [ ] Lab6 Router
 
 
-# Lab1总结
+# Lab0总结
 
 1.实现了一个in-memory reliable ordered bystream,做这个的目的是因为tcp实际上就是这样的一个可靠有序的字节流,不过是基于网络的,
 实现这一个小lab可以更好地理解了tcp两端的一些交互,
@@ -19,7 +19,14 @@
 
 2.webget这个task用课程提供的虚拟镜像运行不了,折腾了好久,放到自己的ubuntu16.04里成功运行,越底层的语言开发环境越折磨人
 
+# Lab1
 
+1.有几个特殊的 case 要处理,增量更新...
+
+2.pesudo code 在这里
+
+
+# 其他
 
 1.减少循环内判断, 放到外面减少循环次数
 
