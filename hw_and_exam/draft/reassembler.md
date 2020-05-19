@@ -1,5 +1,13 @@
 reassmble pesudo code
 
+dup test x
+holes
+many
+overlapping
+seq
+single
+win
+
 if index==nextindex 
 	put into stream
 	count = len(bytes)
