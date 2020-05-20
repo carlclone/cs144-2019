@@ -50,6 +50,13 @@ uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
     right = locateVal-checkpoint;
     left = checkpoint-(locateVal-round32);
 
+    // another impl
+    //    if (locateVal<round32) {
+    //        left = checkpoint+round32 - (locateVal +2*round32 -round32);
+    //    } else {
+    //        left = checkpoint-(locateVal-round32);
+    //    }
+
     if (locateVal>=round32) {
         if (right > left) {
             return locateVal - round32;
