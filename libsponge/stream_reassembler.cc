@@ -48,7 +48,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
                 }
             }
             if (match) {
-                auto subStr = data.substr(lastProvedSegment.size()-1,data.size()-lastProvedSegment.size());
+                auto subStr = data.substr(lastProvedSegment.size(),data.size()-lastProvedSegment.size());
                 push_substring(subStr,nextIndex,eof);
             }
         }
