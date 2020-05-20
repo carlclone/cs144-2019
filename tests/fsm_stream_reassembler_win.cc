@@ -26,6 +26,7 @@ int main() {
     try {
         auto rd = get_random_generator();
 
+        //totally random , these test is insane , and cool !!!!! i love this lab
         // overlapping segments
         for (unsigned rep_no = 0; rep_no < NREPS; ++rep_no) {
             StreamReassembler buf{NSEGS * MAX_SEG_LEN};

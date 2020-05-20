@@ -12,7 +12,7 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
 
-StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity), _capacity(capacity),nextIndex(0),bytesAssembled(0),lastProvedSegment(),tmpMap() {}
+StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity), _capacity(capacity),nextIndex(0),bytesAssembled(0),bytesUnAssembled(0),lastProvedSegment(),tmpMap() {}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
@@ -40,16 +40,40 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         return;
     }
 
+    /*put every byte into map ,
+     * if rech end and eof==true , set eof
+     * if byte already in , ignore
+     * */
     if (index > nextIndex) {
-        tmpMap[index] = pair<std::string,bool>(data,eof);
+        for (size_t i=0;i<data.size();i++) {
+            if (tmpMap.count(index)!=0) {
+                continue;
+            }
+            if (i!=data.size()-1) {
+                tmpMap[index+i] = pair<std::string,bool>(&data[i],false);
+            } else {
+                tmpMap[index+i] = pair<std::string,bool>(&data[i],eof);
+            }
+
+            bytesUnAssembled++;
+        }
     }
 
+    /*
+     * put every byte into stream
+     * if byte is in map, del it
+     */
     if (index == nextIndex) {
-        _output.write(data);
-        auto count = data.size();
-        bytesAssembled+=count;
-        lastProvedSegment = data;
-        nextIndex+=count;
+        for (size_t i=0;i<data.size();i++) {
+            _output.write(&data[i]);
+            bytesAssembled++;
+            nextIndex++;
+
+            if (tmpMap.count(index+i)!=0) {
+                tmpMap.erase(index+i);
+                bytesUnAssembled--;
+            }
+        }
 
         if (eof) {
             _output.end_input();
@@ -61,13 +85,12 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     while(tmpMap.count(nextIndex)!=0) {
         pair<std::string,bool> pair = tmpMap[nextIndex];
         push_substring(pair.first,nextIndex,pair.second);
+        bytesUnAssembled-=pair.first.size();
     }
 }
 
 size_t StreamReassembler::unassembled_bytes() const {
-
-    return 0;
-//    return unassembytes;
+    return bytesUnAssembled;
 }
 
 bool StreamReassembler::empty() const {
