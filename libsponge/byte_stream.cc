@@ -25,7 +25,7 @@ using namespace std;
  *
  * */
 
-ByteStream::ByteStream(const size_t capacity) :capcity(capacity),bytesInPipe(0),bytesReadTotal(0),bytesWriteTotal(0),_ended(false),_eof(false),bytesPipe() {}
+ByteStream::ByteStream(const size_t capacity) :capcity(capacity),bytesInPipe(0),bytesReadTotal(0),bytesWriteTotal(0),_ended(false),bytesPipe() {}
 
 /*把string转成字节数组,写入stream的管道里
  * 如果满了,报错
@@ -66,14 +66,17 @@ void ByteStream::pop_output(const size_t len) {
     }
     bytesInPipe-=minSize;
     bytesReadTotal+=minSize;
-    if (bytesInPipe == 0 && input_ended()) {
-        _eof=true;
-    }
+
 }
 
 
 //`true` if the output has reached the ending
-bool ByteStream::eof() const { return _eof; }
+bool ByteStream::eof() const {
+    if (bytesInPipe == 0 && input_ended()) {
+        return true;
+    }
+    return false;
+}
 size_t ByteStream::bytes_written() const { return bytesWriteTotal; }
 size_t ByteStream::bytes_read() const { return bytesReadTotal; }
 // capcity-buffersize

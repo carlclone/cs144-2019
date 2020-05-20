@@ -17,7 +17,7 @@ class ByteStream {
   private:
     // Your code here -- add private members as necessary.
     size_t capcity,bytesInPipe,bytesReadTotal,bytesWriteTotal;
-    bool _ended,_eof;
+    bool _ended;
     std::deque<char> bytesPipe;
 
 
