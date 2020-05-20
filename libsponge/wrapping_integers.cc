@@ -36,17 +36,37 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
 
     // n - isn , 获得相对于0的值
-    //
-    uint64_t absSeqno = n.raw_value()-isn.raw_value();
-    while (absSeqno < checkpoint)
-        absSeqno += round32;
-    //
-    if (absSeqno >= round32) {
-        if (checkpoint - (absSeqno - round32) < absSeqno - checkpoint)
-            absSeqno -= round32;
-    }
-    return absSeqno;
+    // 找到checkpoint所在的圈, 和上一个圈 , 比对和checkpoint的差值
+    uint64_t absSeq = n.raw_value() - isn.raw_value();
+    uint64_t locateRound = static_cast<int>(checkpoint / round32);
 
+    uint64_t locateVal = locateRound*round32 + absSeq;
+
+    uint64_t right,left;
+    if (locateVal < checkpoint) {
+        locateVal+=round32;
+    }
+
+    right = locateVal-checkpoint;
+    left = checkpoint-(locateVal-round32);
+
+    if (locateVal>=round32) {
+        if (right > left) {
+            return locateVal - round32;
+        }
+    }
+    return static_cast<uint64_t>(locateVal);
+
+
+    /*
+     * pesudo code
+     * abs = n-isn
+     * nearestRound = checkpoint  % round32;
+     * left  = nearestRound -1;
+     * right = nearestRound +1;
+     * absGap1 = nearestRound * (round32)+abs;
+     * absGap2 = left * (round32) +abs
+     */
 
 
 }
