@@ -90,11 +90,16 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     }
 
     //see if next byte is in map;
-    if (tmpMap.count(nextIndex)!=0) {
+    while (tmpMap.count(nextIndex)!=0) {
         pair<std::string,bool> pair = tmpMap[nextIndex];
         tmpMap.erase(nextIndex);
         bytesUnAssembled--;
-        push_substring(pair.first,nextIndex,pair.second);
+
+        _output.write(pair.first);
+        if (pair.second) {
+            _output.end_input();
+        }
+        nextIndex++;
     }
 }
 
