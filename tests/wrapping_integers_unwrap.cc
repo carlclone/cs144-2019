@@ -21,16 +21,16 @@ int main() {
         // Unwrap the 10th from last byte before the third wrap
         test_should_be(unwrap(WrappingInt32(UINT32_MAX - 10), WrappingInt32(0), 3 * (1ul << 32)), 3 * (1ul << 32) - 11);
         // Non-zero ISN
-        //TODO;
+        //TODO;   sub isn , then same as above
         test_should_be(unwrap(WrappingInt32(UINT32_MAX), WrappingInt32(10), 3 * (1ul << 32)), 3 * (1ul << 32) - 11);
-        // Big unwrap
+        // Big unwrap , your impl possible overflow ? seems not , just equal
         test_should_be(unwrap(WrappingInt32(UINT32_MAX), WrappingInt32(0), 0), static_cast<uint64_t>(UINT32_MAX));
-        // Unwrap a non-zero ISN
+        // Unwrap a non-zero ISN  x
         test_should_be(unwrap(WrappingInt32(16), WrappingInt32(16), 0), 0ul);
 
-        // Big unwrap with non-zero ISN
+        // Big unwrap with non-zero ISN TODO; -1 round ?
         test_should_be(unwrap(WrappingInt32(15), WrappingInt32(16), 0), static_cast<uint64_t>(UINT32_MAX));
-        // Big unwrap with non-zero ISN
+        // Big unwrap with non-zero ISN ,
         test_should_be(unwrap(WrappingInt32(0), WrappingInt32(INT32_MAX), 0), static_cast<uint64_t>(INT32_MAX) + 2);
         // Barely big unwrap with non-zero ISN
         test_should_be(unwrap(WrappingInt32(UINT32_MAX), WrappingInt32(INT32_MAX), 0), static_cast<uint64_t>(1) << 31);
