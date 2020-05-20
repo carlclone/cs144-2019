@@ -26,16 +26,21 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
          * increment update
          */
         if (index+data.size()>nextIndex ) {
-            bool match=true;
-            for (size_t i=0;i<lastProvedSegment.size();i++) {
-                if (data[i]!=lastProvedSegment[i]) {
-                    match=false;
-                    break;
-                }
-            }
-            if (match) {
-                auto subStr = data.substr(lastProvedSegment.size(),data.size()-lastProvedSegment.size());
-                push_substring(subStr,nextIndex,eof);
+                /*
+                 * put extra into map
+                 */
+                for (size_t i=nextIndex-index-1;i<data.size();i++) {
+                    if (tmpMap.count(index+i)!=0) {
+                        continue;
+                    }
+                    if (i!=data.size()-1) {
+                        tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),false);
+                    } else {
+                        tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),eof);
+                    }
+
+                    bytesUnAssembled++;
+
             }
         }
         /*
@@ -44,7 +49,6 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         else {
             return;
         }
-        return;
     }
 
     /*put every byte into map ,
