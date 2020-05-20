@@ -22,9 +22,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
      *  如果不吻合,放到一个未重组的list中,或者map中 , 等待在它前面的index到达后 , 再取出来放入bytestream
      *  map的大小就是capacity , 最多只能有capacity个字节未重组
      * */
-    if (data.size()==0) {
-        return;
-    }
+
 
     if (index == nextIndex) {
         _output.write(data);

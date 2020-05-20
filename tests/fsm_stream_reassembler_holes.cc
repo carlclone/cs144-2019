@@ -35,6 +35,7 @@ int main() {
 
         {
             //设为eof的场景 , 需要在这个segment写入bytestream之后 , 把byteStream设end_input , 需要额外记录一个endIndex , 如果endIndex==nextIndex,end_input
+            //x 还是需要 pair , 否则可能有多个 eof提交 endIndex被覆盖 , 尽量保存足够的信息吧
             ReassemblerTestHarness test{65000};
 
             test.execute(SubmitSegment{"b", 1}.with_eof(true));
@@ -52,6 +53,7 @@ int main() {
 
         {
 
+            //x
             ReassemblerTestHarness test{65000};
 
             test.execute(SubmitSegment{"b", 1});
@@ -65,6 +67,7 @@ int main() {
         {
             ReassemblerTestHarness test{65000};
 
+            //x
             test.execute(SubmitSegment{"b", 1});
             test.execute(BytesAssembled(0));
             test.execute(BytesAvailable(""));
@@ -90,6 +93,7 @@ int main() {
         {
             ReassemblerTestHarness test{65000};
 
+            //x
             test.execute(SubmitSegment{"b", 1});
             test.execute(BytesAssembled(0));
             test.execute(BytesAvailable(""));
@@ -108,6 +112,7 @@ int main() {
         }
 
         {
+            //x
             ReassemblerTestHarness test{65000};
 
             test.execute(SubmitSegment{"b", 1});

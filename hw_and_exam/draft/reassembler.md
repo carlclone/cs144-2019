@@ -4,8 +4,8 @@ dup test x
 holes
 many
 overlapping
-seq
-single
+seq x
+single x
 win
 
 
@@ -32,7 +32,7 @@ if index < nextIndex
         return
 
 if index>nextIndex
-	temporary save to map[index]=bytes
+	temporary save to map[index]=[bytes,eof]
 
 
 while (map[nextIndex] exist) 
