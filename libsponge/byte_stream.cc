@@ -37,7 +37,7 @@ size_t ByteStream::write(const string &data) {
     size_t i;
     size_t minSize = min(data.size(),remaining_capacity());
     for ( i=0; i<minSize;i++) {
-        bytesPipe.push_front(data[i]);
+        bytesPipe.push_back(data[i]);
     }
     bytesWriteTotal+=minSize;
     bytesInPipe+=minSize;
