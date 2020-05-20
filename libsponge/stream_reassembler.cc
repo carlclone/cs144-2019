@@ -18,12 +18,13 @@ StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity),
 //! possibly out-of-order, from the logical stream, and assembles any newly
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
-    /*思路: 如果和当前的index吻合,则放入bytestream中
-     *  如果不吻合,放到一个未重组的list中,或者map中 , 等待在它前面的index到达后 , 再取出来放入bytestream
-     *  map的大小就是capacity , 最多只能有capacity个字节未重组
-     * */
+
+
 
     if (index<nextIndex) {
+        /*
+         * increment update
+         */
         if (index+data.size()>nextIndex ) {
             bool match=true;
             for (size_t i=0;i<lastProvedSegment.size();i++) {
@@ -37,6 +38,12 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
                 push_substring(subStr,nextIndex,eof);
             }
         }
+        /*
+         * immediately ignore
+         */
+        else {
+            return;
+        }
         return;
     }
 
@@ -46,17 +53,18 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
      * */
     if (index > nextIndex) {
         for (size_t i=0;i<data.size();i++) {
-            if (tmpMap.count(index)!=0) {
+            if (tmpMap.count(index+i)!=0) {
                 continue;
             }
             if (i!=data.size()-1) {
-                tmpMap[index+i] = pair<std::string,bool>(&data[i],false);
+                tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),false);
             } else {
-                tmpMap[index+i] = pair<std::string,bool>(&data[i],eof);
+                tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),eof);
             }
 
             bytesUnAssembled++;
         }
+        return;
     }
 
     /*
@@ -64,9 +72,10 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
      * if byte is in map, del it
      */
     if (index == nextIndex) {
+        lastProvedSegment=data;
         for (size_t i=0;i<data.size();i++) {
-            _output.write(&data[i]);
-            bytesAssembled++;
+            _output.write(data.substr(i,1));
+
             nextIndex++;
 
             if (tmpMap.count(index+i)!=0) {
@@ -80,12 +89,12 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         }
     }
 
-
-
-    while(tmpMap.count(nextIndex)!=0) {
+    //see if next byte is in map;
+    if (tmpMap.count(nextIndex)!=0) {
         pair<std::string,bool> pair = tmpMap[nextIndex];
+        tmpMap.erase(nextIndex);
+        bytesUnAssembled--;
         push_substring(pair.first,nextIndex,pair.second);
-        bytesUnAssembled-=pair.first.size();
     }
 }
 
