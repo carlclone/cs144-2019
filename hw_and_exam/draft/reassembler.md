@@ -8,11 +8,20 @@ seq
 single
 win
 
+
+if endIndex!=-1 && index+len(bytes)-1>endIndex
+    return
+
+
 if index==nextindex 
 	put into stream
 	count = len(bytes)
 	byteassembled+=count
 	lastProvedSegment = bytes
+	nextIndex+=len(bytes)
+	
+	if nextindex == endIndex
+	    byteStream.input_ended()
 
 if index < nextIndex 
     if index+len(bytes) > nextIndex && partOfMatchLastProvedSegment
@@ -26,7 +35,8 @@ if index>nextIndex
 	temporary save to map[index]=bytes
 
 
-
-
+while (map[nextIndex] exist) 
+    submitSegment(map[nextIndex],nextIndex)
+    
 
 

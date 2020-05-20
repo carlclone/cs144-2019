@@ -13,7 +13,8 @@ class StreamReassembler {
     // Your code here -- add private members as necessary.
 
     ByteStream _output;  //!< The reassembled in-order byte stream
-    size_t _capacity,nextIndex;    //!< The maximum number of bytes
+    size_t _capacity,nextIndex,bytesAssembled;    //!< The maximum number of bytes
+    std::string lastProvedSegment;
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.

@@ -11,6 +11,7 @@ using namespace std;
 int main() {
     try {
         {
+            //x
             ReassemblerTestHarness test{65000};
 
             test.execute(SubmitSegment{"b", 1});
@@ -21,6 +22,7 @@ int main() {
         }
 
         {
+            //x
             ReassemblerTestHarness test{65000};
 
             test.execute(SubmitSegment{"b", 1});
@@ -32,6 +34,7 @@ int main() {
         }
 
         {
+            //设为eof的场景 , 需要在这个segment写入bytestream之后 , 把byteStream设end_input , 需要额外记录一个endIndex , 如果endIndex==nextIndex,end_input
             ReassemblerTestHarness test{65000};
 
             test.execute(SubmitSegment{"b", 1}.with_eof(true));
@@ -48,6 +51,7 @@ int main() {
         }
 
         {
+
             ReassemblerTestHarness test{65000};
 
             test.execute(SubmitSegment{"b", 1});
