@@ -31,7 +31,11 @@
 
 5.没有人肉走完`test case`就开始写代码，结果是想的模型不对，不能满足后面的`case`，基本是推翻重写 （第一次是用`segment`，字符串的角度进行重组，但遇到了增量更新，未重组字节级别的覆盖，重组字节级别覆盖的`case`，最后把思考的模型改成字节流，代码也清晰许多）,这点让我想到业务开发里也是一样，没有往后思考可能的需求（更完善的`test case` ） ，导致代码只能东拼西凑满足功能，完全不堪入目。
 
+6.dian fan bao boom
 
+7.pesudo code + test case is a powerful combo
+
+8.maybe multiple eof , so need to store every eof state
 
 
 # Lab2
