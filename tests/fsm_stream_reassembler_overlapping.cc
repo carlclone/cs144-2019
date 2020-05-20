@@ -40,6 +40,11 @@ int main() {
             const size_t cap = {1000};
             ReassemblerTestHarness test{cap};
 
+            // if index in map ,
+            // retrieve it ,
+            // check how much bytes are same ,
+            // del old unassemble ,
+            // if still left bytes diffrent , update new index=[bytes,eof]pair
             test.execute(SubmitSegment{"b", 1});
             test.execute(BytesAvailable(""));
 
@@ -66,6 +71,8 @@ int main() {
             const size_t cap = {1000};
             ReassemblerTestHarness test{cap};
 
+            //if index in map , ...
+            //the same as above
             test.execute(SubmitSegment{"c", 2});
             test.execute(BytesAvailable(""));
 
@@ -113,6 +120,8 @@ int main() {
             const size_t cap = {1000};
             ReassemblerTestHarness test{cap};
 
+            //shou bu liao le !!
+            //take string part into bytes map
             test.execute(SubmitSegment{"bcd", 1});
             test.execute(SubmitSegment{"c", 2});
 
