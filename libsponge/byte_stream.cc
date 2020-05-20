@@ -53,7 +53,7 @@ size_t ByteStream::write(const string &data) {
 string ByteStream::peek_output(const size_t len) const {
     //返回管道中 0到0+len的字节 , 转成字符串
     size_t minSize = min(len,buffer_size());
-    return string(bytesPipe[0],bytesPipe[minSize-1]);
+    return string(bytesPipe.begin(),bytesPipe.begin()+minSize);
 }
 
 //同上
