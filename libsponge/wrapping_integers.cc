@@ -14,8 +14,8 @@ using namespace std;
 //! \param n The input absolute 64-bit sequence number
 //! \param isn The initial sequence number
 WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
-    auto max32 = 4294967296;
-    return isn+(n%max32);
+    auto round32 = 4294967296; // 1<<32 , start a new round , the max32bit is 4294967295
+    return isn+(n% round32);
 //    DUMMY_CODE(n, isn);
 //    return WrappingInt32{0};
 }
