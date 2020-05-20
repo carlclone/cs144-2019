@@ -23,6 +23,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
      *  map的大小就是capacity , 最多只能有capacity个字节未重组
      * */
 
+    DUMMY_CODE(eof);
     if (index == nextIndex) {
         _output.write(data);
         auto count = data.size();
