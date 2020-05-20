@@ -1,5 +1,7 @@
 #include "wrapping_integers.hh"
 
+#include <iostream>
+
 // Dummy implementation of a 32-bit wrapping integer
 
 // For Lab 2, please replace with a real implementation that passes the
@@ -34,31 +36,17 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
 
     // n - isn , 获得相对于0的值
-    // 找到checkpoint所在的圈, 和上一个圈 , 比对和checkpoint的差值
-    auto absSeq = n - isn;
-    auto locateRound = checkpoint % round32;
-    auto lastRound = locateRound - 1;
-
-    auto locateVal = locateRound * round32 + absSeq;
-    auto lastVal = lastRound * round32 + absSeq;
-
-    if (abs(locateVal - checkpoint) > abs(lastVal - checkpoint)) {
-        return lastVal;
-    } else {
-        return locateVal;
+    //
+    uint64_t absSeqno = n.raw_value()-isn.raw_value();
+    while (absSeqno < checkpoint)
+        absSeqno += round32;
+    //
+    if (absSeqno >= round32) {
+        if (checkpoint - (absSeqno - round32) < absSeqno - checkpoint)
+            absSeqno -= round32;
     }
-    /*
-     * pesudo code
-     * abs = n-isn
-     * nearestRound = checkpoint  % round32;
-     * left  = nearestRound -1;
-     * right = nearestRound +1;
-     * absGap1 = nearestRound * (round32)+abs;
-     * absGap2 = left * (round32) +abs
-     */
-    auto relative = n - isn;
+    return absSeqno;
 
 
-    DUMMY_CODE(n, isn, checkpoint);
-    return {};
+
 }
