@@ -23,19 +23,6 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
      *  map的大小就是capacity , 最多只能有capacity个字节未重组
      * */
 
-
-    if (index == nextIndex) {
-        _output.write(data);
-        auto count = data.size();
-        bytesAssembled+=count;
-        lastProvedSegment = data;
-        nextIndex+=count;
-
-        if (eof) {
-            _output.end_input();
-        }
-    }
-
     if (index<nextIndex) {
         if (index+data.size()>nextIndex ) {
             bool match=true;
@@ -57,9 +44,23 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         tmpMap[index] = pair<std::string,bool>(data,eof);
     }
 
+    if (index == nextIndex) {
+        _output.write(data);
+        auto count = data.size();
+        bytesAssembled+=count;
+        lastProvedSegment = data;
+        nextIndex+=count;
+
+        if (eof) {
+            _output.end_input();
+        }
+    }
+
+
+
     while(tmpMap.count(nextIndex)!=0) {
-        auto pair = tmpMap[nextIndex];
-        push_substring(pair.first(),nextIndex,pair.second());
+        pair<std::string,bool> pair = tmpMap[nextIndex];
+        push_substring(pair.first,nextIndex,pair.second);
     }
 }
 
