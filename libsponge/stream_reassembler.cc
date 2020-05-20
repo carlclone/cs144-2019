@@ -12,7 +12,7 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
 
-StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity), _capacity(capacity),nextIndex(0),bytesAssembled(0),lastProvedSegment() {}
+StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity), _capacity(capacity),nextIndex(0),bytesAssembled(0),lastProvedSegment(),tmpMap() {}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
@@ -53,9 +53,14 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         return;
     }
 
+    if (index > nextIndex) {
+        tmpMap[index] = pair<std::string,bool>(data,eof);
+    }
 
-
-
+    while(tmpMap.count(nextIndex)!=0) {
+        auto pair = tmpMap[nextIndex];
+        push_substring(pair.first(),nextIndex,pair.second());
+    }
 }
 
 size_t StreamReassembler::unassembled_bytes() const {

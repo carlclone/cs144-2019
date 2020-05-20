@@ -15,6 +15,7 @@ class StreamReassembler {
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity,nextIndex,bytesAssembled;    //!< The maximum number of bytes
     std::string lastProvedSegment;
+    std::map<size_t,std::pair<std::string,bool>> tmpMap;
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
