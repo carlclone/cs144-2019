@@ -26,6 +26,7 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
      */
     if (header.syn && !synced) {
         hisIsn = header.seqno;
+        //1
         nextSeqno= unwrap(hisIsn+1,hisIsn,hisIsn.raw_value());
         raw = nextSeqno;
         synced=true;
@@ -60,28 +61,37 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
      */
     if (synced) {
 
+        //1       1
         auto absSeqLeft = unwrap(header.seqno,hisIsn,nextSeqno); //116
+        //1+3=4   4
         auto absSeqRight = absSeqLeft+data.size()-1; //117
 
+        //1  5
         auto absWindowLeft = nextSeqno; //116
+
+        //1+4000=4001   max
         auto absWindowRight=nextSeqno+window_size()-1; //130
 
+        //1   5
         auto absMaxLeft = max(absSeqLeft,absWindowLeft); // 116
+        //4   4
         auto absMinRight = min(absSeqRight,absWindowRight); //117
 
         /*
          * calculate by absMax ,min
          */
+        //0  4
         auto skipBytesInLeft =absMaxLeft - absSeqLeft; //0
+        //4-4=0
         auto skipBytesInRight = absSeqRight - absMinRight; //0
 
+        if (skipBytesInLeft+skipBytesInRight>=data.size()) {
+            return false;
+        }
 
         //0 , 1-0
         auto bytesInWindow = data.str().substr(skipBytesInLeft,data.size()-skipBytesInRight);
 
-        if (bytesInWindow.size()==0) {
-            return false;
-        }
 
         // a , 116 ,
         _reassembler.push_substring(static_cast<std::string>(bytesInWindow),absMaxLeft-raw,false);
@@ -89,7 +99,7 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         /*
          * 更新 window/+
          */
-        nextSeqno +=bytesInWindow.size();
+        nextSeqno +=bytesInWindow.size(); //5
 
         if (closeInput) {
             stream_out().end_input();
