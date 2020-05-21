@@ -13,6 +13,24 @@
 using namespace std;
 
 int main() {
+
+//    TCPSegment seg;
+//    std::list<TCPSegment> l;
+//    TCPSegment seg2;
+//    seg.header().seqno=WrappingInt32(123);
+//    l.push_front(seg);
+//    l.push_front(seg2);
+//
+//    auto i = l.begin();
+//    for (;i!=l.end();) {
+//
+//        std::cout << i->header().seqno;
+//        i = l.erase(i);
+//    }
+//
+//
+//
+//    exit(0);
     try {
         auto rd = get_random_generator();
 

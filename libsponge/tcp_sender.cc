@@ -27,7 +27,7 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
     , unAckWindowRight(0)  //无符号数,得把区间定义改成前闭后开了
     , syncSent(false)
     , finSent(false)
-    , retxList()
+    , retxList(capacity)
     , retxTimeout(_initial_retransmission_timeout)
     , retxTimeLeft(_initial_retransmission_timeout) {}
 
@@ -88,7 +88,7 @@ void TCPSender::fill_window() {
 
     if (seg.length_in_sequence_space()) {
         segments_out().push(seg);
-        //        retxList.push_back(seg);
+        retxList.push_front(seg);
     }
 }
 
@@ -105,13 +105,16 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     /*
      * maintain retxList
      */
-    //    auto retxSeg = retxList.begin();
-    //    while (retxSeg!=retxList.end()) {
-    //        auto expectAbsAckno = unwrap(retxSeg->header().seqno,_isn,next_seqno_absolute() )+
-    //        retxSeg->length_in_sequence_space(); if  (expectAbsAckno <= absAck) {
-    //            retxList.erase(retxSeg);
-    //        }
-    //    }
+    auto retxSeg = retxList.begin();
+    while (retxSeg != retxList.end()) {
+        auto expectAbsAckno = unwrap(retxSeg->header().seqno, _isn, next_seqno_absolute()) + retxSeg->length_in_sequence_space();
+        if (expectAbsAckno <= absAck) {
+            //                retxList.erase(retxSeg);
+            retxSeg = retxList.erase(retxSeg);
+            retxTimeLeft = _initial_retransmission_timeout;
+        }
+        retxSeg++;
+    }
 
     /*
      * 维护未 ack 窗口
@@ -134,10 +137,11 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 void TCPSender::tick(const size_t ms_since_last_tick) {
     retxTimeLeft -= ms_since_last_tick;
 
-    //    if (retxTimeLeft==0) {
-    //        TCPSegment seg = retxList.front();
-    //        segments_out().push(seg);
-    //    }
+    if (retxTimeLeft <= 0) {
+        TCPSegment seg = retxList.front();
+        segments_out().push(seg);
+        retxTimeLeft = consecutive_retransmissions() * _initial_retransmission_timeout;
+    }
 }
 
 unsigned int TCPSender::consecutive_retransmissions() const { return consecutiveCount; }
