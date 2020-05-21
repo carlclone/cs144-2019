@@ -164,7 +164,7 @@ int main() {
         }
 
         {
-            //
+            //pass
             // Segment overflowing the window on left side is acceptable.
             size_t cap = 4;
             uint32_t isn = 23452;
@@ -177,6 +177,7 @@ int main() {
 
         {
             // Segment matching the window is acceptable.
+            //pass
             size_t cap = 4;
             uint32_t isn = 23452;
             TCPReceiverTestHarness test{cap};

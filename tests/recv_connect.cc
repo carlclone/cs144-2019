@@ -15,7 +15,7 @@ int main() {
     try {
         // auto rd = get_random_generator();
 
-        {
+        {//pass
             TCPReceiverTestHarness test{4000};
             test.execute(ExpectWindow{4000});
             test.execute(ExpectAckno{std::optional<WrappingInt32>{}});
@@ -27,7 +27,7 @@ int main() {
             test.execute(ExpectTotalAssembledBytes{0});
         }
 
-        {
+        {//pass
             TCPReceiverTestHarness test{5435};
             test.execute(ExpectAckno{std::optional<WrappingInt32>{}});
             test.execute(ExpectUnassembledBytes{0});
@@ -39,6 +39,7 @@ int main() {
         }
 
         {
+            //pass
             TCPReceiverTestHarness test{5435};
             test.execute(ExpectAckno{std::optional<WrappingInt32>{}});
             test.execute(ExpectUnassembledBytes{0});
@@ -49,7 +50,7 @@ int main() {
             test.execute(ExpectTotalAssembledBytes{0});
         }
 
-        {
+        {//pass
             TCPReceiverTestHarness test{5435};
             test.execute(ExpectAckno{std::optional<WrappingInt32>{}});
             test.execute(ExpectUnassembledBytes{0});
@@ -61,7 +62,7 @@ int main() {
             test.execute(ExpectTotalAssembledBytes{0});
         }
 
-        {
+        {//pass
             TCPReceiverTestHarness test{5435};
             test.execute(ExpectAckno{std::optional<WrappingInt32>{}});
             test.execute(ExpectUnassembledBytes{0});
@@ -79,6 +80,7 @@ int main() {
 
         {
             TCPReceiverTestHarness test{4000};
+            // syn and fin and the same time ?
             test.execute(SegmentArrives{}.with_syn().with_seqno(5).with_fin().with_result(SegmentArrives::Result::OK));
             test.execute(ExpectState{TCPReceiverStateSummary::FIN_RECV});
             test.execute(ExpectAckno{WrappingInt32{7}});

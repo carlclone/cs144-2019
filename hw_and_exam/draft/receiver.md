@@ -22,7 +22,12 @@ x
 test4
 
 
-
+# test case complex level
+connect
+close
+transmit
+window
+reorder
 
 pesudo code
 
@@ -38,12 +43,7 @@ len() = length_insequence_space()
 property syned ,fined,  ackNo 
 property capacity , reassembler , bytestream
 
-if segment.fin && fined 
-    return no ok;
 
-
-if segment.fin && !fined
-    // do sth ...
 
 
 if segement.syn && syned 
@@ -56,6 +56,13 @@ if segment.syn && !syned
     syned=true
     return ok
 
+if segment.fin && fined 
+    return no ok;
+
+
+if segment.fin && !fined
+    // do sth ...
+    nextSeqno +=1
 
 if syned
     absSeq = unwrap(seqno,hisIsn,nextSeqno)
