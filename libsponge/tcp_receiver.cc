@@ -31,12 +31,13 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
     }
 
     if (synced) {
+
         auto absSeq = unwrap(header.seqno,hisIsn,nextSeqno);
 
         if (absSeq < nextSeqno) {
             if (absSeq + data.size() >= nextSeqno) {
                 //may be need substr
-                _reassembler.push_substring();
+                _reassembler.push_substring(data.str().data(),absSeq, false);
             } else {
                 //out of window
                 return false;
@@ -51,11 +52,12 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         //不是连续的,但在 窗口里,fit in的部分写入
         if (absSeq!=nextSeqno) {
             auto sub = data.str().substr(0,window_size());
+            _reassembler.push_substring(sub.data(),absSeq,false);
         }
 
         //如果是连续的,则放入reassembler
         if (absSeq == nextSeqno) {
-            _reassembler.push_substring();
+            _reassembler.push_substring(data.str().data(),absSeq, false);
             nextSeqno+=data.size();
         }
         return true;
