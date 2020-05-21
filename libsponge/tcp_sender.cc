@@ -54,18 +54,22 @@ void TCPSender::fill_window() {
         // retxList.push(seg);
 
     } else {
+        seg.header().seqno = next_seqno();
+
+        auto remainWindowSize = hisWindowSize - bytes_in_flight();
         /*
          * 关闭
          */
-        if (stream_in().input_ended()) {
+        if (stream_in().input_ended() && remainWindowSize>0 ) {
             finSent = true;
-            seg.header().seqno = next_seqno();
+
             seg.header().fin = true;
             _next_seqno++;
             unAckWindowRight++;
+            remainWindowSize--;
         }
 
-        auto remainWindowSize = hisWindowSize - bytes_in_flight();
+
         if (stream_in().buffer_size() > 0 && remainWindowSize > 0) {
             auto minSize = min(stream_in().buffer_size(), remainWindowSize);
 
@@ -98,6 +102,7 @@ void TCPSender::fill_window() {
 bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
     auto absAck = unwrap(ackno, _isn, next_seqno_absolute());
 
+    hisWindowSize = window_size;
     if (absAck < next_seqno_absolute()) {
         return true;
     }
@@ -111,7 +116,8 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
         if (expectAbsAckno <= absAck) {
             //                retxList.erase(retxSeg);
             retxSeg = retxList.erase(retxSeg);
-            retxTimeLeft = _initial_retransmission_timeout;
+            retxTimeout = retxTimeLeft = _initial_retransmission_timeout;
+            consecutiveCount=0;
         }
         retxSeg++;
     }
@@ -120,7 +126,7 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
      * 维护未 ack 窗口
      */
     unAckWindowLeft = min(unAckWindowRight, absAck);
-    hisWindowSize = window_size;
+
     /*
      * 重传相关
      */
@@ -138,9 +144,11 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
     retxTimeLeft -= ms_since_last_tick;
 
     if (retxTimeLeft <= 0) {
+        consecutiveCount++;
         TCPSegment seg = retxList.front();
         segments_out().push(seg);
-        retxTimeLeft = consecutive_retransmissions() * _initial_retransmission_timeout;
+        retxTimeout*=2;
+        retxTimeLeft = retxTimeout;
     }
 }
 
