@@ -93,13 +93,14 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         auto bytesInWindow = data.str().substr(skipBytesInLeft,data.size()-skipBytesInRight);
 
 
+        auto beforeWritten = stream_out().bytes_written();
         // a , 116 ,
         _reassembler.push_substring(static_cast<std::string>(bytesInWindow),absMaxLeft-raw,false);
 
         /*
          * 更新 window/+
          */
-        nextSeqno +=bytesInWindow.size(); //5
+        nextSeqno += (stream_out().bytes_written() - beforeWritten ); //5
 
         if (closeInput) {
             stream_out().end_input();
