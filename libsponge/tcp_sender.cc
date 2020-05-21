@@ -27,18 +27,24 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
     , unAckWindowRight(0)  //无符号数,得把区间定义改成前闭后开了
     , syncSent(false)
     , finSent(false)
-    , retxQueue() {}
+    , retxQueue()
+    , retxTimeout(_initial_retransmission_timeout)
+    , retxTimeLeft(_initial_retransmission_timeout){}
 
 uint64_t TCPSender::bytes_in_flight() const { return unAckWindowRight - unAckWindowLeft; }
 
 void TCPSender::fill_window() {
-    if (!syncSent) {
-        TCPSegment seg;
+
+    if (finSent) {
+        return ;
+    }
+
+    TCPSegment seg;
+    if (next_seqno_absolute()==0) {
         seg.header().syn = true;
         seg.header().seqno = next_seqno();
         _next_seqno++;
         segments_out().push(seg);
-        syncSent = true;
         /*
          * 维护窗口
          */
@@ -47,38 +53,55 @@ void TCPSender::fill_window() {
          * 重传相关实现
          */
         // retxQueue.push(seg);
-    }
 
-    auto remainWindowSize = hisWindowSize - bytes_in_flight();
-    if (stream_in().buffer_size() > 0 && remainWindowSize > 0) {
-        auto minSize = min(stream_in().buffer_size(), remainWindowSize);
-        TCPSegment seg;
-        seg.header().seqno = next_seqno();
+    } else {
         /*
-         * 关闭
-         */
+* 关闭
+*/
         if (stream_in().input_ended()) {
+            finSent=true;
+            seg.header().seqno = next_seqno();
             seg.header().fin = true;
             _next_seqno++;
+            unAckWindowRight++;
         }
 
-        /*
-         * payload
-         */
+        auto remainWindowSize = hisWindowSize - bytes_in_flight();
+        if (stream_in().buffer_size() > 0 && remainWindowSize > 0) {
+            auto minSize = min(stream_in().buffer_size(), remainWindowSize);
 
-        Buffer buf{stream_in().peek_output(minSize)};
-        stream_in().pop_output(minSize);
 
-        seg.payload() = buf;
-        _next_seqno += minSize;
 
-        segments_out().push(seg);
+            /*
+             * payload
+             */
 
-        /*
-         * 维护窗口
-         */
-        unAckWindowRight += minSize;
+            Buffer buf{stream_in().peek_output(minSize)};
+            stream_in().pop_output(minSize);
+
+            seg.payload() = buf;
+            _next_seqno += minSize;
+
+
+
+            /*
+             * 维护窗口
+             */
+            unAckWindowRight += minSize;
+        }
     }
+
+
+
+
+
+
+    if (seg.length_in_sequence_space()) {
+        segments_out().push(seg);
+        retxQueue.push(seg);
+
+    }
+
 }
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
@@ -89,6 +112,18 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 
     if (absAck < next_seqno_absolute()) {
         return true;
+    }
+
+    /*
+     * maintain retxQueue
+     */
+    auto oldest = retxQueue.front();
+    auto expectAbsAckno = unwrap(oldest.header().seqno,_isn,next_seqno_absolute() )+ oldest.length_in_sequence_space();
+
+    while  (expectAbsAckno <= absAck) {
+        retxQueue.pop();
+        oldest = retxQueue.front();
+        expectAbsAckno = unwrap(oldest.header().seqno,_isn,next_seqno_absolute() )+ oldest.length_in_sequence_space();
     }
 
     /*
@@ -109,7 +144,14 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 }
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
-void TCPSender::tick(const size_t ms_since_last_tick) { DUMMY_CODE(ms_since_last_tick); }
+void TCPSender::tick(const size_t ms_since_last_tick) {
+    retxTimeLeft-=ms_since_last_tick;
+
+    if (retxTimeLeft==0) {
+        TCPSegment seg = retxQueue.front();
+        segments_out().push(seg);
+    }
+}
 
 unsigned int TCPSender::consecutive_retransmissions() const { return consecutiveCount; }
 
