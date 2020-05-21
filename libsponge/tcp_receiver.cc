@@ -12,12 +12,13 @@ using namespace std;
 
 bool TCPReceiver::segment_received(const TCPSegment &seg) {
     auto header = seg.header();
+    auto data = seg.payload();
     if (header.syn && synced) {
         return false;
     }
     if (header.syn && !synced) {
         hisIsn = header.seqno;
-        nextSeqno= hisIsn.raw_value() + 1;
+        nextSeqno= unwrap(hisIsn+1,hisIsn,hisIsn.raw_value());
         synced=true;
     }
     if (header.fin && fined) {
@@ -30,7 +31,39 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
     }
 
     if (synced) {
+        auto absSeq = unwrap(header.seqno,hisIsn,nextSeqno);
+
+        if (absSeq < nextSeqno) {
+            if (absSeq + data.size() >= nextSeqno) {
+                //may be need substr
+                _reassembler.push_substring();
+            } else {
+                //out of window
+                return false;
+            }
+        }
+
+        if (absSeq-nextSeqno+1 > stream_out().remaining_capacity()) {
+            //out of window
+            return false;
+        }
+
+        //不是连续的,但在 窗口里,fit in的部分写入
+        if (absSeq!=nextSeqno) {
+            auto sub = data.str().substr(0,window_size());
+        }
+
+        //如果是连续的,则放入reassembler
+        if (absSeq == nextSeqno) {
+            _reassembler.push_substring();
+            nextSeqno+=data.size();
+        }
         return true;
+
+
+
+
+
     } else {
         return false;
     }
