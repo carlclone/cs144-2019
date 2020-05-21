@@ -5,8 +5,10 @@
 // For Lab 2, please replace with a real implementation that passes the
 // automated checks run by `make check_lab2`.
 
-template <typename... Targs>
+template<typename... Targs>
 void DUMMY_CODE(Targs &&... /* unused */) {}
+
+static const auto round32 = 4294967296; // 1<<32 , start a new round , the max32bit is 4294967295
 
 using namespace std;
 
@@ -14,8 +16,7 @@ using namespace std;
 //! \param n The input absolute 64-bit sequence number
 //! \param isn The initial sequence number
 WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
-    auto round32 = 4294967296; // 1<<32 , start a new round , the max32bit is 4294967295
-    return isn+(n% round32);
+    return isn + (n % round32);
 //    DUMMY_CODE(n, isn);
 //    return WrappingInt32{0};
 }
@@ -31,6 +32,33 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
 //! and the other stream runs from the remote TCPSender to the local TCPReceiver and
 //! has a different ISN.
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
+
+    // n - isn , 获得相对于0的值
+    // 找到checkpoint所在的圈, 和上一个圈 , 比对和checkpoint的差值
+    auto absSeq = n - isn;
+    auto locateRound = checkpoint % round32;
+    auto lastRound = locateRound - 1;
+
+    auto locateVal = locateRound * round32 + absSeq;
+    auto lastVal = lastRound * round32 + absSeq;
+
+    if (abs(locateVal - checkpoint) > abs(lastVal - checkpoint)) {
+        return lastVal;
+    } else {
+        return locateVal;
+    }
+    /*
+     * pesudo code
+     * abs = n-isn
+     * nearestRound = checkpoint  % round32;
+     * left  = nearestRound -1;
+     * right = nearestRound +1;
+     * absGap1 = nearestRound * (round32)+abs;
+     * absGap2 = left * (round32) +abs
+     */
+    auto relative = n - isn;
+
+
     DUMMY_CODE(n, isn, checkpoint);
     return {};
 }

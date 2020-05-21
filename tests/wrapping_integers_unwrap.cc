@@ -28,7 +28,7 @@ int main() {
         // Unwrap a non-zero ISN  x
         test_should_be(unwrap(WrappingInt32(16), WrappingInt32(16), 0), 0ul);
 
-        // Big unwrap with non-zero ISN TODO; -1 round ?
+        // Big unwrap with non-zero ISN TODO; -1 round ? 一个环的模型,但是向下溢出要怎么做? 负数的话, 32bitlen+负数
         test_should_be(unwrap(WrappingInt32(15), WrappingInt32(16), 0), static_cast<uint64_t>(UINT32_MAX));
         // Big unwrap with non-zero ISN ,
         test_should_be(unwrap(WrappingInt32(0), WrappingInt32(INT32_MAX), 0), static_cast<uint64_t>(INT32_MAX) + 2);
