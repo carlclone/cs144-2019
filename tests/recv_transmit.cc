@@ -31,31 +31,27 @@ int main() {
             uint32_t isn = 384678;
             TCPReceiverTestHarness test{4000};
             test.execute(SegmentArrives{}.with_syn().with_seqno(isn).with_result(SegmentArrives::Result::OK));
-            test.execute(
-                SegmentArrives{}.with_seqno(isn + 1).with_data("abcd").with_result(SegmentArrives::Result::OK));
+            test.execute(SegmentArrives{}.with_seqno(isn + 1).with_data("abcd").with_result(SegmentArrives::Result::OK));
             test.execute(ExpectAckno{WrappingInt32{isn + 5}});
             test.execute(ExpectUnassembledBytes{0});
             test.execute(ExpectTotalAssembledBytes{4});
             test.execute(ExpectBytes{"abcd"});
-            test.execute(
-                SegmentArrives{}.with_seqno(isn + 5).with_data("efgh").with_result(SegmentArrives::Result::OK));
+            test.execute(SegmentArrives{}.with_seqno(isn + 5).with_data("efgh").with_result(SegmentArrives::Result::OK));
             test.execute(ExpectAckno{WrappingInt32{isn + 9}});
             test.execute(ExpectUnassembledBytes{0});
             test.execute(ExpectTotalAssembledBytes{8});
             test.execute(ExpectBytes{"efgh"});
         }
 
-        {
+        {//t3
             uint32_t isn = 5;
             TCPReceiverTestHarness test{4000};
             test.execute(SegmentArrives{}.with_syn().with_seqno(isn).with_result(SegmentArrives::Result::OK));
-            test.execute(
-                SegmentArrives{}.with_seqno(isn + 1).with_data("abcd").with_result(SegmentArrives::Result::OK));
+            test.execute(SegmentArrives{}.with_seqno(isn + 1).with_data("abcd").with_result(SegmentArrives::Result::OK));
             test.execute(ExpectAckno{WrappingInt32{isn + 5}});
             test.execute(ExpectUnassembledBytes{0});
             test.execute(ExpectTotalAssembledBytes{4});
-            test.execute(
-                SegmentArrives{}.with_seqno(isn + 5).with_data("efgh").with_result(SegmentArrives::Result::OK));
+            test.execute(SegmentArrives{}.with_seqno(isn + 5).with_data("efgh").with_result(SegmentArrives::Result::OK));
             test.execute(ExpectAckno{WrappingInt32{isn + 9}});
             test.execute(ExpectUnassembledBytes{0});
             test.execute(ExpectTotalAssembledBytes{8});
