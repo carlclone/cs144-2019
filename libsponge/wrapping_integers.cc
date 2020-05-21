@@ -36,11 +36,10 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
 
     // n - isn , 获得相对于0的值
-    //
+    // 参考了别人的实现   , 之后人肉过一遍case,画一下图和pesudo code吧
     uint64_t absSeqno = n.raw_value()-isn.raw_value();
     while (absSeqno < checkpoint)
-        absSeqno += round32;
-    //
+        absSeqno += round32; //
     if (absSeqno >= round32) {
         if (checkpoint - (absSeqno - round32) < absSeqno - checkpoint)
             absSeqno -= round32;
