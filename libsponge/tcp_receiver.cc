@@ -27,6 +27,7 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
     if (header.syn && !synced) {
         hisIsn = header.seqno;
         nextSeqno= unwrap(hisIsn+1,hisIsn,hisIsn.raw_value());
+        raw = nextSeqno;
         synced=true;
     }
 
@@ -37,16 +38,20 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         return false;
     }
 
+    bool closeInput = false;
     /*
      * 首次 fin
      */
     if (header.fin && !fined) {
-        nextSeqno+=1;
         fined=true;
-        stream_out().end_input();
+        closeInput = true;
     }
 
     if (data.size()==0) {
+        if (closeInput) {
+            stream_out().end_input();
+            nextSeqno+=1;
+        }
         return true;
     }
 
@@ -55,34 +60,41 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
      */
     if (synced) {
 
-        auto absSeqLeft = unwrap(header.seqno,hisIsn,nextSeqno);
-        auto absSeqRight = absSeqLeft+data.size()-1;
+        auto absSeqLeft = unwrap(header.seqno,hisIsn,nextSeqno); //116
+        auto absSeqRight = absSeqLeft+data.size()-1; //117
 
-        auto absWindowLeft = nextSeqno;
-        auto absWindowRight=nextSeqno+window_size()-1;
+        auto absWindowLeft = nextSeqno; //116
+        auto absWindowRight=nextSeqno+window_size()-1; //130
 
-        auto absMaxLeft = max(absSeqLeft,absWindowLeft);
-        auto absMinRight = min(absSeqRight,absWindowRight);
+        auto absMaxLeft = max(absSeqLeft,absWindowLeft); // 116
+        auto absMinRight = min(absSeqRight,absWindowRight); //117
 
         /*
          * calculate by absMax ,min
          */
-        auto skipBytesInLeft =absMaxLeft - absSeqLeft;
-        auto skipBytesInRight = absSeqRight - absMinRight;
+        auto skipBytesInLeft =absMaxLeft - absSeqLeft; //0
+        auto skipBytesInRight = absSeqRight - absMinRight; //0
 
 
-        auto bytesInWindow = data.str().substr(skipBytesInLeft-1,data.size()-skipBytesInRight);
+        //0 , 1-0
+        auto bytesInWindow = data.str().substr(skipBytesInLeft,data.size()-skipBytesInRight);
 
-//        if (bytesInWindow.size()==0) {
-//            return false;
-//        }
+        if (bytesInWindow.size()==0) {
+            return false;
+        }
 
-        _reassembler.push_substring(static_cast<std::string>(bytesInWindow),absMaxLeft,false);
+        // a , 116 ,
+        _reassembler.push_substring(static_cast<std::string>(bytesInWindow),absMaxLeft-raw,false);
 
         /*
          * 更新 window/+
          */
         nextSeqno +=bytesInWindow.size();
+
+        if (closeInput) {
+            stream_out().end_input();
+            nextSeqno+=1;
+        }
 
         return true;
     } else {

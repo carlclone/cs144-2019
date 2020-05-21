@@ -12,6 +12,14 @@
 using namespace std;
 
 int main() {
+    auto rec = TCPReceiver{4000};
+    TCPSegment seg;
+    seg.header().syn=true;
+    seg.header().seqno =WrappingInt32(3740222213);
+
+    rec.segment_received(seg);
+
+    rec.segment_received(seg);
     try {
         auto rd = get_random_generator();
 

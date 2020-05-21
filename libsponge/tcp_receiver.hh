@@ -21,7 +21,7 @@ class TCPReceiver {
     size_t _capacity;
     WrappingInt32 hisIsn;
     bool synced,fined;
-    uint64_t nextSeqno;
+    uint64_t nextSeqno,raw;
 
 
   public:
@@ -35,7 +35,7 @@ class TCPReceiver {
         hisIsn(0),
         synced(false),
     fined(false),
-    nextSeqno(0){}
+    nextSeqno(0),raw(0){}
 
     //! \name Accessors to provide feedback to the remote TCPSender
     //!@{
