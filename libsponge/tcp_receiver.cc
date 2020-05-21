@@ -46,6 +46,10 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         stream_out().end_input();
     }
 
+    if (data.size()==0) {
+        return true;
+    }
+
     /*
      * 将在窗口内的字节放入 reassembler 里
      */
@@ -67,11 +71,11 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         auto skipBytesInRight = absSeqRight - absMinRight;
 
 
-        auto bytesInWindow = data.str().substr(skipBytesInLeft,data.size()-skipBytesInRight);
+        auto bytesInWindow = data.str().substr(skipBytesInLeft-1,data.size()-skipBytesInRight);
 
-        if (bytesInWindow.size()==0) {
-            return false;
-        }
+//        if (bytesInWindow.size()==0) {
+//            return false;
+//        }
 
         _reassembler.push_substring(static_cast<std::string>(bytesInWindow),absMaxLeft,false);
 
