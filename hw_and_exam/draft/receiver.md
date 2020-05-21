@@ -63,6 +63,8 @@ if segment.fin && fined
 if segment.fin && !fined
     // do sth ...
     nextSeqno +=1
+    fined=true
+    stream_out.end_input()
 
 if syned
     absSeq = unwrap(seqno,hisIsn,nextSeqno)

@@ -18,6 +18,7 @@ int main() {
         auto rd = get_random_generator();
 
         {
+            //pass
             TCPReceiverTestHarness test{4000};
             test.execute(SegmentArrives{}.with_syn().with_seqno(0).with_result(SegmentArrives::Result::OK));
             test.execute(SegmentArrives{}.with_seqno(1).with_data("abcd").with_result(SegmentArrives::Result::OK));
@@ -28,6 +29,7 @@ int main() {
         }
 
         {
+            //pass
             uint32_t isn = 384678;
             TCPReceiverTestHarness test{4000};
             test.execute(SegmentArrives{}.with_syn().with_seqno(isn).with_result(SegmentArrives::Result::OK));
@@ -43,7 +45,7 @@ int main() {
             test.execute(ExpectBytes{"efgh"});
         }
 
-        {//t3 x
+        {//t3 x pass
             uint32_t isn = 5;
             TCPReceiverTestHarness test{4000};
             test.execute(SegmentArrives{}.with_syn().with_seqno(isn).with_result(SegmentArrives::Result::OK));
@@ -58,7 +60,7 @@ int main() {
             test.execute(ExpectBytes{"abcdefgh"});
         }
 
-        { //t4
+        { //t4 pass
             TCPReceiverTestHarness test{4000};
             test.execute(SegmentArrives{}.with_syn().with_seqno(0).with_result(SegmentArrives::Result::OK));
             test.execute(SegmentArrives{}.with_seqno(1).with_data("abcd").with_result(SegmentArrives::Result::OK));
