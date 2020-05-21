@@ -40,7 +40,7 @@ class TCPSender {
     unsigned int consecutiveCount , hisWindowSize;
     uint64_t unAckWindowLeft,unAckWindowRight;
     bool syncSent,finSent;
-    std::queue<TCPSegment> retxQueue;
+    std::list<TCPSegment> retxList;
     unsigned int retxTimeout , retxTimeLeft;
 
   public:
