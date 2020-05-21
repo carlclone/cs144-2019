@@ -1,5 +1,7 @@
 #include "stream_reassembler.hh"
 
+#include <iostream>
+
 // Dummy implementation of a stream reassembler.
 
 // For Lab 1, please replace with a real implementation that passes the
@@ -20,32 +22,38 @@ StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity),
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
 
 
+    auto minSize = min(data.size(),stream_out().remaining_capacity());
 
     if (index<nextIndex) {
+
         /*
          * increment update
          */
         if (index+data.size()>nextIndex ) {
-                /*
-                 * put extra into map
-                 */
-                for (size_t i=nextIndex-index-1;i<data.size();i++) {
-                    if (tmpMap.count(index+i)!=0) {
-                        continue;
-                    }
-                    if (i!=data.size()-1) {
-                        tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),false);
-                    } else {
-                        tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),eof);
-                    }
+            /*
+             * put extra into map
+             */
+            for (size_t i=nextIndex-index-1;i<data.size();i++) {
+                //capacity test case
+                if (stream_out().remaining_capacity()==0) {
+                    continue;
+                }
+                if (tmpMap.count(index+i)!=0) {
+                    continue;
+                }
+                if (i!=data.size()-1) {
+                    tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),false);
+                } else {
+                    tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),eof);
+                }
 
-                    bytesUnAssembled++;
+                bytesUnAssembled++;
 
             }
         }
-        /*
-         * immediately ignore
-         */
+            /*
+             * immediately ignore
+             */
         else {
             return;
         }
@@ -56,11 +64,11 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
      * if byte already in , ignore
      * */
     if (index > nextIndex) {
-        for (size_t i=0;i<data.size();i++) {
+        for (size_t i=0;i<minSize;i++) {
             if (tmpMap.count(index+i)!=0) {
                 continue;
             }
-            if (i!=data.size()-1) {
+            if (i!=minSize-1) {
                 tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),false);
             } else {
                 tmpMap[index+i] = pair<std::string,bool>(data.substr(i,1),eof);
@@ -77,7 +85,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
      */
     if (index == nextIndex) {
         lastProvedSegment=data;
-        for (size_t i=0;i<data.size();i++) {
+        for (size_t i=0;i<minSize;i++) {
             _output.write(data.substr(i,1));
 
             nextIndex++;
@@ -112,6 +120,5 @@ size_t StreamReassembler::unassembled_bytes() const {
 }
 
 bool StreamReassembler::empty() const {
-    return false;
-//    return un ==0;
+    return stream_out().buffer_empty();
 }
