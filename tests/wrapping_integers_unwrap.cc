@@ -10,6 +10,9 @@
 using namespace std;
 
 int main() {
+  //  cout<<unwrap(WrappingInt32(UINT32_MAX), WrappingInt32(0), 0);
+//    test_should_be(unwrap(WrappingInt32(UINT32_MAX), WrappingInt32(0), 0), static_cast<uint64_t>(UINT32_MAX));
+//exit(0);
     try {
         // Unwrap the first byte after ISN
         test_should_be(unwrap(WrappingInt32(1), WrappingInt32(0), 0), 1ul);
