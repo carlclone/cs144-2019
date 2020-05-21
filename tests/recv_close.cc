@@ -18,6 +18,7 @@ int main() {
         {
             //pass
             uint32_t isn = uniform_int_distribution<uint32_t>{0, UINT32_MAX}(rd);
+            isn=0;
             TCPReceiverTestHarness test{4000};
             test.execute(ExpectState{TCPReceiverStateSummary::LISTEN});
             test.execute(SegmentArrives{}.with_syn().with_seqno(isn + 0).with_result(SegmentArrives::Result::OK));

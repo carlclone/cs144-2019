@@ -51,7 +51,7 @@ if segement.syn && syned
 
 if segment.syn && !syned
     hisIsn = segment.seqno
-    nextSeqno = segment.seqno+1 
+    nextSeqno = segment.seqno+1 //abs , not wrapping
   
     syned=true
     return ok
