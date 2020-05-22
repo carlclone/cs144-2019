@@ -117,49 +117,15 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
     if (_sender.segments_out().size()==0) {
         _sender.send_empty_segment();
     }
-    if(_sender.segments_out().size()==0) {
-        return;
-    }
-    auto seg1 = _sender.segments_out().front();
-//    if (seg.header().fin) {
-//        cout<<"size";
-//        cout<<_sender.segments_out().size();
-//        cout<<seg1.header().ackno;
-//    }
-
-    _sender.segments_out().pop();
-    if (_receiver.ackno().has_value()) {
-        seg1.header().ack = true;
-        seg1.header().ackno = _receiver.ackno().value();
-        if (seg.header().fin) {
-            //cout << _receiver.ackno().value();
-            //cout<<_sender.segments_out().size();
-            //seg1.header().ackno = WrappingInt32(3);
-        }
-
-        seg1.header().win = _receiver.window_size();
-    }
-//    if (seg.header().fin) {
-//        cout<<"size";
-//        cout<<_sender.segments_out().size();
-//        cout<<seg1.header().ackno;
-//        cout <<segments_out().size();
-//    }
-    segments_out().push(seg1);
-//    if (seg.header().fin) {
-//
-//        cout <<segments_out().size();
-//    }
-
     /*
-     * Before  sending  the  segment,  theTCPConnection
-     * will  ask  theTCPReceiver for  the fields
-     * it’s responsible for on outgoing segments:
-     * ackno and windowsize.
-     * If there is anackno,1
-     * it will set theackflag and the fields in theTCPSegment.
-     */
-    //sendOut();
+ * Before  sending  the  segment,  theTCPConnection
+ * will  ask  theTCPReceiver for  the fields
+ * it’s responsible for on outgoing segments:
+ * ackno and windowsize.
+ * If there is anackno,1
+ * it will set theackflag and the fields in theTCPSegment.
+ */
+    sendOut();
 }
 void TCPConnection::askReceiver(TCPSegment &ongoingSeg) const {
     auto ackno = _receiver.ackno();
@@ -197,17 +163,37 @@ bool TCPConnection::active() const {
 
 size_t TCPConnection::write(const string &data) {
     auto size =  _sender.stream_in().write(data);
+    _sender.fill_window();
+    sendOut();
     return size;
 }
 
 void TCPConnection::print() {
-    cout << _receiver.ackno().value();
+    //cout << _receiver.ackno().value();
+    //cout<<_sender.consecutive_retransmissions();
+    cout<<"abc";
 }
 
 //! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
 void TCPConnection::tick(const size_t ms_since_last_tick) {
     timeSinceLastSegmentReceived+=ms_since_last_tick;
-    _sender.tick(ms_since_last_tick);
+
+    /*
+     * there are two situations where you’ll want to abort the entire
+     * connection:
+     *
+     * 1.If the sender has sent too many consecutive
+     * retransmissions without success
+     * (morethanTCPConfig::MAXRETXATTEMPTS, i.e., 8).
+     *
+     */
+
+
+    if (_sender.consecutive_retransmissions() > TCPConfig::MAX_RETX_ATTEMPTS) {
+        doReset();
+    }
+
+
     if (state()==TCPState::State::ESTABLISHED) {
         _sender.fill_window();
     }
@@ -222,17 +208,8 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
 
     sendOut();
 
-    /*
-     * there are two situations where you’ll want to abort the entire
-     * connection:
-     *
-     * 1.If the sender has sent too many consecutive
-     * retransmissions without success
-     * (morethanTCPConfig::MAXRETXATTEMPTS, i.e., 8).
-     *
-     */
 
-    //todo;
+
 }
 void TCPConnection::sendOut() {
     while  (_sender.segments_out().size()>0) {
@@ -267,9 +244,10 @@ TCPConnection::~TCPConnection() {
     //todo;
     try {
         if (active()) {
-            cerr << "Warning: Unclean shutdown of TCPConnection\n";
+
 
             // Your code here: need to send a RST segment to the peer
+            doReset();
         }
     } catch (const exception &e) {
         std::cerr << "Exception destructing TCP FSM: " << e.what() << std::endl;
@@ -310,8 +288,6 @@ void TCPConnection::doReset(bool send) {
     if (send) {
         segments_out().push(seg);
     }
-
-
 }
 
 
