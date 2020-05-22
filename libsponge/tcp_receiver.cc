@@ -15,6 +15,15 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
     return {};
 }
 
-optional<WrappingInt32> TCPReceiver::ackno() const { return {}; }
+optional<WrappingInt32> TCPReceiver::ackno() const {
+    if (synced) {
+        //return hisIsn + stream_out().bytes_written()+1;
+        return wrap(stream_out().bytes_written()+1,hisIsn);
+    }
+    return {};
+}
 
-size_t TCPReceiver::window_size() const { return {}; }
+size_t TCPReceiver::window_size() const {
+    //cap - bytesinstream
+    return stream_out().remaining_capacity();
+}
