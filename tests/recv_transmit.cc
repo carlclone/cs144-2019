@@ -43,7 +43,7 @@ int main() {
             test.execute(ExpectBytes{"efgh"});
         }
 
-        {//t3
+        {//t3 x
             uint32_t isn = 5;
             TCPReceiverTestHarness test{4000};
             test.execute(SegmentArrives{}.with_syn().with_seqno(isn).with_result(SegmentArrives::Result::OK));
@@ -58,16 +58,15 @@ int main() {
             test.execute(ExpectBytes{"abcdefgh"});
         }
 
-        {
+        { //t4
             TCPReceiverTestHarness test{4000};
             test.execute(SegmentArrives{}.with_syn().with_seqno(0).with_result(SegmentArrives::Result::OK));
             test.execute(SegmentArrives{}.with_seqno(1).with_data("abcd").with_result(SegmentArrives::Result::OK));
-            test.execute(
-                SegmentArrives{}.with_seqno(1).with_data("efgh").with_result(SegmentArrives::Result::OUT_OF_WINDOW));
-            test.execute(
-                SegmentArrives{}.with_seqno(4005).with_data("efgh").with_result(SegmentArrives::Result::OUT_OF_WINDOW));
+            test.execute(SegmentArrives{}.with_seqno(1).with_data("efgh").with_result(SegmentArrives::Result::OUT_OF_WINDOW));
+            test.execute(SegmentArrives{}.with_seqno(4005).with_data("efgh").with_result(SegmentArrives::Result::OUT_OF_WINDOW));
         }
 
+        //考虑溢出
         // Many (arrive/read)s
         {
             TCPReceiverTestHarness test{4000};

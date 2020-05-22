@@ -17,3 +17,79 @@ test2
 
 test3
 
+x
+
+test4
+
+
+
+
+pesudo code
+
+//ack理解为,这个num前面的都收到了,下次从这个开始发 (next expected data)
+//seq num理解为,这次要发的数据放置在字节流中的这个num处
+//syn和ack也占一位seqno
+
+// the index of the last reassembled byte as the checkpoint.
+//注意绝对seqno和相对seqno , 还有字节流的index要剔除掉syn和fin ,  别弄混了
+
+len() = length_insequence_space()
+
+property syned , checkpoint
+
+if segment.syn && !syned
+    hisIsn = segment.seqno
+    nextSeqno = segment.seqno+1 
+    checkpoint  = 0;
+    syned=true
+    return ok
+
+if syned
+
+    if absSeq < nextSeqno
+        return out of window
+        
+    if absSeq-nextSeqno > remaining_capacity
+        return out of window    
+
+    //如果是连续的,则放入reassembler
+    absSeq = unwrap(seqno,hisIsn,checkpoint)
+    if absSeq == nextSeqno
+        reassembler.push_string(segment.data,absSeq)
+        nextSeqno +=len(data)
+        checkpoint+=len(data)
+        return [ack=wrap(nextSeqno) , ok]
+       
+
+
+
+//The lower (sometimes called “left”) edge of the window is called the ackno: it’s the index of
+  the first byte that the TCPReceiver doesn’t already know
+  
+//it’s
+  the sequence number of the first byte that the receiver hasn’t already been able to reassemble
+  
+//higher (or “right”) edge of the window is the first index that the TCPReceiver is not
+  willing to accept
+  
+//In practice, your
+  receiver will announce a window size equal to its capacity minus the number of bytes being
+  held in its StreamReassembler’s ByteStream.
+
+
+//receive window size
+// lower = ackno-1 = last segment received
+// higher = last acceptable segment
+
+higher-lower <=rws
+window = higher-lower
+
+
+//
+func window()
+    
+    
+    
+    //暂时不实现cumulative task
+fun ack()
+    

@@ -7,6 +7,14 @@
 - [ ] Lab5 NetWork Interface
 - [ ] Lab6 Router
 
+# 材料
+
+[schedule 2019](https://cs144.github.io/)
+
+[cs144视频 2013](https://www.bilibili.com/video/BV137411Z7LR?from=search&seid=14214950455188752553)
+
+
+
 
 # Lab0总结
 
@@ -39,6 +47,9 @@
 
 
 # Lab2
+
+[sliding window 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=33)
+
 
 .....
 
