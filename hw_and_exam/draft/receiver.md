@@ -35,29 +35,34 @@ pesudo code
 
 len() = length_insequence_space()
 
-property syned , checkpoint
+property syned ,  ackNo 
+property capacity , reassembler , bytestream
 
 if segment.syn && !syned
     hisIsn = segment.seqno
     nextSeqno = segment.seqno+1 
-    checkpoint  = 0;
+  
     syned=true
     return ok
 
 if syned
-
+    absSeq = unwrap(seqno,hisIsn,nextSeqno)
     if absSeq < nextSeqno
         return out of window
         
     if absSeq-nextSeqno > remaining_capacity
         return out of window    
+        
+    //不是连续的,但在 窗口里,fit in的部分写入
+    if absSeq!=nextSeqno 
+        substr(segment.data,0, window_size() )
 
     //如果是连续的,则放入reassembler
-    absSeq = unwrap(seqno,hisIsn,checkpoint)
+    
     if absSeq == nextSeqno
         reassembler.push_string(segment.data,absSeq)
         nextSeqno +=len(data)
-        checkpoint+=len(data)
+
         return [ack=wrap(nextSeqno) , ok]
        
 
@@ -87,9 +92,9 @@ window = higher-lower
 
 //
 func window()
-    
+    cap- bytesinstream
     
     
     //暂时不实现cumulative task
 fun ack()
-    
+    return hisIsn + stream_out().bytes_written()+1;

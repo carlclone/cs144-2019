@@ -20,19 +20,29 @@ int main() {
             size_t cap = 4000;
             uint32_t isn = 23452;
             TCPReceiverTestHarness test{cap};
-            test.execute(SegmentArrives{}.with_syn().with_seqno(isn).with_result(SegmentArrives::Result::OK));
+            test.execute(SegmentArrives{}.with_syn().with_seqno(isn).
+            with_result(SegmentArrives::Result::OK));
             test.execute(ExpectAckno{WrappingInt32{isn + 1}});
             test.execute(ExpectWindow{cap});
             test.execute(
-                SegmentArrives{}.with_seqno(isn + 1).with_data("abcd").with_result(SegmentArrives::Result::OK));
+                SegmentArrives{}.with_seqno(isn + 1).with_data("abcd").
+                with_result(SegmentArrives::Result::OK));
             test.execute(ExpectAckno{WrappingInt32{isn + 5}});
             test.execute(ExpectWindow{cap - 4});
+
+            //todo; 不连续的,先放入reassembler里
             test.execute(
-                SegmentArrives{}.with_seqno(isn + 9).with_data("ijkl").with_result(SegmentArrives::Result::OK));
+                SegmentArrives{}.with_seqno(isn + 9).with_data("ijkl").
+                with_result(SegmentArrives::Result::OK));
+            //ackno和window都还不变
             test.execute(ExpectAckno{WrappingInt32{isn + 5}});
             test.execute(ExpectWindow{cap - 4});
+
+            //当连续的到达之后, 加上byteStream的bytes_written
             test.execute(
-                SegmentArrives{}.with_seqno(isn + 5).with_data("efgh").with_result(SegmentArrives::Result::OK));
+                SegmentArrives{}.with_seqno(isn + 5).with_data("efgh").
+                with_result(SegmentArrives::Result::OK));
+            //passed
             test.execute(ExpectAckno{WrappingInt32{isn + 13}});
             test.execute(ExpectWindow{cap - 12});
         }

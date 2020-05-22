@@ -45,6 +45,8 @@
 
 8.maybe multiple eof , so need to store every eof state
 
+9 imple an out of order , repeat, overlapping , increment update , reliable reassembler
+
 
 # Lab2
 
