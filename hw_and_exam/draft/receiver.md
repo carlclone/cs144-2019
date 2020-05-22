@@ -61,7 +61,7 @@ if syned
     absSeq = unwrap(seqno,hisIsn,nextSeqno)
     if absSeq < nextSeqno
         
-        if absSeq+segment.data.size()>=nextSeqno //这个可能要切割,可能超过window size 
+        if absSeq+segment.data.size()>=nextSeqno //这个可能要切割,可能超过window size  ( bs负责提供连续的字节流给上层 , reass负责重组 , receiver负责flow control , 保证不会超过容量 , 就由receiver做切割吧
             
             push_string(segement.data,absSeq)
         else 
