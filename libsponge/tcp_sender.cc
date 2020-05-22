@@ -160,7 +160,7 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
     retxTimePass += ms_since_last_tick;
 
 
-    if (retxTimePass >=retxTimeout) {
+    if (retxTimePass >retxTimeout) {
         consecutiveCount++;
         TCPSegment seg = retxList.front();
         segments_out().push(seg);
