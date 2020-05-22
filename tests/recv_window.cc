@@ -16,6 +16,7 @@ int main() {
         // auto rd = get_random_generator();
 
         {
+            //pass
             // Window size decreases appropriately
             size_t cap = 4000;
             uint32_t isn = 23452;
@@ -30,7 +31,7 @@ int main() {
             test.execute(ExpectAckno{WrappingInt32{isn + 5}});
             test.execute(ExpectWindow{cap - 4});
 
-            //todo; 不连续的,先放入reassembler里
+            //todo; 不连续的,fit in size ,切割后先放入reassembler里
             test.execute(
                 SegmentArrives{}.with_seqno(isn + 9).with_data("ijkl").
                 with_result(SegmentArrives::Result::OK));
@@ -42,7 +43,7 @@ int main() {
             test.execute(
                 SegmentArrives{}.with_seqno(isn + 5).with_data("efgh").
                 with_result(SegmentArrives::Result::OK));
-            //passed
+
             test.execute(ExpectAckno{WrappingInt32{isn + 13}});
             test.execute(ExpectWindow{cap - 12});
         }
@@ -84,7 +85,7 @@ int main() {
         }
 
         {
-            //
+            // pass
             // almost-high-seqno segment is accepted, but only some bytes are kept
             size_t cap = 2;
             uint32_t isn = 23452;
