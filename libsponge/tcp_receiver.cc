@@ -13,59 +13,96 @@ using namespace std;
 bool TCPReceiver::segment_received(const TCPSegment &seg) {
     auto header = seg.header();
     auto data = seg.payload();
+
+    /*
+     * 如果已经同步过了,拒绝该 syn
+     */
     if (header.syn && synced) {
         return false;
     }
+
+    /*
+     * 首次 syn
+     */
     if (header.syn && !synced) {
         hisIsn = header.seqno;
         nextSeqno= unwrap(hisIsn+1,hisIsn,hisIsn.raw_value());
         synced=true;
     }
+
+    /*
+     * 已经 fin 过,拒绝
+     */
     if (header.fin && fined) {
         return false;
     }
+
+    /*
+     * 首次 fin
+     */
     if (header.fin && !fined) {
         nextSeqno+=1;
         fined=true;
         stream_out().end_input();
     }
 
+    /*
+     * 将在窗口内的字节放入 reassembler 里
+     */
     if (synced) {
 
-        auto absSeq = unwrap(header.seqno,hisIsn,nextSeqno);
+        auto absSeqLeft = unwrap(header.seqno,hisIsn,nextSeqno);
+        auto absSeqRight = absSeqLeft+data.size()-1;
 
-        if (absSeq < nextSeqno) {
-            if (absSeq + data.size() >= nextSeqno) {
+        auto absWindowLeft = 123;
+        auto absWindowRight=123;
+
+        auto absMaxLeft = max(absSeqLeft,absWindowLeft);
+        auto absMinRight = min(absSeqRight,absWindowRight);
+
+        /*
+         * calculate by absMax ,min
+         */
+        auto bytesInWindow = 123;
+
+        _reassembler.push_substring(bytesInWindow,absMaxLeft,false);
+
+        /*
+         * 更新 window
+         */
+
+
+
+
+        if (absSeqLeft < nextSeqno) {
+            /*
+             * 小于 nextSeqno 但是有多的字节(or 在窗口内的字节),增量 ,
+             * 截取在窗口内的字节,如果不为空则写入 reassembler
+             */
+            if (absSeqLeft + data.size() >= nextSeqno) {
                 //may be need substr
-                _reassembler.push_substring(data.str().data(),absSeq, false);
-            } else {
-                //out of window
-                return false;
+                _reassembler.push_substring(data.str().data(), absSeqLeft, false);
             }
+
         }
 
-        if (absSeq-nextSeqno+1 > stream_out().remaining_capacity()) {
-            //out of window
-            return false;
-        }
-
-        //不是连续的,但在 窗口里,fit in的部分写入
-        if (absSeq!=nextSeqno) {
+        if (absSeqLeft > nextSeqno) {
+            /*
+             * 大于 seqno ,截取处于窗口内的字节,不为空则写入
+             */
             auto sub = data.str().substr(0,window_size());
-            _reassembler.push_substring(sub.data(),absSeq,false);
+            _reassembler.push_substring(sub.data(), absSeqLeft,false);
         }
 
-        //如果是连续的,则放入reassembler
-        if (absSeq == nextSeqno) {
-            _reassembler.push_substring(data.str().data(),absSeq, false);
+        /*
+         * 截取在窗口内的字节,不为空写入
+         */
+        if (absSeqLeft == nextSeqno) {
+            _reassembler.push_substring(data.str().data(), absSeqLeft, false);
             nextSeqno+=data.size();
         }
+
         return true;
-
-
-
-
-
     } else {
         return false;
     }
