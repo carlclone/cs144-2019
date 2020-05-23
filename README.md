@@ -1,7 +1,7 @@
 
 - [x] Lab0 webget,ByteStream
 - [x] Lab1 StreamReassembler
-- [ ] Lab2 TCP Receiver
+- [x] Lab2 TCP Receiver
 - [ ] Lab3 TCP Sender
 - [ ] Lab4 TCP Connection
 - [ ] Lab5 NetWork Interface
