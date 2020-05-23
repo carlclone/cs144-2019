@@ -54,8 +54,8 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         auto absSeqLeft = unwrap(header.seqno,hisIsn,nextSeqno);
         auto absSeqRight = absSeqLeft+data.size()-1;
 
-        auto absWindowLeft = 123;
-        auto absWindowRight=123;
+        auto absWindowLeft = nextSeqno;
+        auto absWindowRight=nextSeqno+window_size()-1;
 
         auto absMaxLeft = max(absSeqLeft,absWindowLeft);
         auto absMinRight = min(absSeqRight,absWindowRight);
@@ -63,44 +63,22 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
         /*
          * calculate by absMax ,min
          */
-        auto bytesInWindow = 123;
+        auto skipBytesInLeft =absMaxLeft - absSeqLeft;
+        auto skipBytesInRight = absSeqRight - absMinRight;
 
-        _reassembler.push_substring(bytesInWindow,absMaxLeft,false);
+
+        auto bytesInWindow = data.str().substr(skipBytesInLeft,data.size()-skipBytesInRight);
+
+        if (bytesInWindow.size()==0) {
+            return false;
+        }
+
+        _reassembler.push_substring(static_cast<std::string>(bytesInWindow),absMaxLeft,false);
 
         /*
-         * 更新 window
+         * 更新 window/+
          */
-
-
-
-
-        if (absSeqLeft < nextSeqno) {
-            /*
-             * 小于 nextSeqno 但是有多的字节(or 在窗口内的字节),增量 ,
-             * 截取在窗口内的字节,如果不为空则写入 reassembler
-             */
-            if (absSeqLeft + data.size() >= nextSeqno) {
-                //may be need substr
-                _reassembler.push_substring(data.str().data(), absSeqLeft, false);
-            }
-
-        }
-
-        if (absSeqLeft > nextSeqno) {
-            /*
-             * 大于 seqno ,截取处于窗口内的字节,不为空则写入
-             */
-            auto sub = data.str().substr(0,window_size());
-            _reassembler.push_substring(sub.data(), absSeqLeft,false);
-        }
-
-        /*
-         * 截取在窗口内的字节,不为空写入
-         */
-        if (absSeqLeft == nextSeqno) {
-            _reassembler.push_substring(data.str().data(), absSeqLeft, false);
-            nextSeqno+=data.size();
-        }
+        nextSeqno +=bytesInWindow.size();
 
         return true;
     } else {
