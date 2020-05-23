@@ -52,6 +52,16 @@
 
 [sliding window 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=33)
 
+1.实现对 syn,fin,和带data 的 tcp segment 的接收,处理和响应
+
+2.看着 test case 写了第一版 pesudo code, 然后直接在 pesudo code 上重构了一版,以窗口为模型,截取在窗口内的字节流
+
+3.最后精简完,就 20 多行代码...用了 2 天
+
+4.课程作者写测试用例辛苦了
+
+5.lab2 对 lab1的 reassembler 增加了容量限制的 test case , 又回去 debug 了一会
+
 
 .....
 
