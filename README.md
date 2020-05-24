@@ -56,11 +56,19 @@
 
 2.看着 test case 写了第一版 pesudo code, 然后直接在 pesudo code 上重构了一版,以窗口为模型,截取在窗口内的字节流
 
-3.最后精简完,就 70 多行代码...用了 2 天
+3.最后精简完,就 100 多行代码...用了 2 天
 
-4.课程作者写测试用例辛苦了
+4.测试用例很完善, 真的感谢课程作者
 
-5.lab2 对 lab1的 reassembler 增加了容量限制的 test case , 又回去 debug 了一会
+5.lab2 对 lab1的 reassembler 增加了容量限制的 test case , 又回去 debug 了一会 , 涉及容量的问题只取在窗口内的字节就行了
+
+6.同时收到 fin 和数据的时候,要处理完数据再处理 fin
+
+7.window size只更新连续字节流部分
+
+8.还没找到这套测试框架打印数据的方法
+
+9.写入 Reassembler 的时候要用absolute index, 从 0 开始的,不计算 syn 位的索引
 
 
 .....
