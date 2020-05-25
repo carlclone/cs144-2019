@@ -17,6 +17,7 @@ int main() {
 
         {
 
+            //pass
             TCPConfig cfg;
             WrappingInt32 isn(rd());
             cfg.fixed_isn = isn;
@@ -32,6 +33,7 @@ int main() {
             WrappingInt32 isn(rd());
             cfg.fixed_isn = isn;
 
+            //pass
             TCPSenderTestHarness test{"SYN acked test", cfg};
             test.execute(ExpectState{TCPSenderStateSummary::SYN_SENT});
             test.execute(ExpectSegment{}.with_no_flags().with_syn(true).with_payload_size(0).with_seqno(isn));
@@ -47,6 +49,7 @@ int main() {
             WrappingInt32 isn(rd());
             cfg.fixed_isn = isn;
 
+            //pass
             TCPSenderTestHarness test{"SYN -> wrong ack test", cfg};
             test.execute(ExpectState{TCPSenderStateSummary::SYN_SENT});
             test.execute(ExpectSegment{}.with_no_flags().with_syn(true).with_payload_size(0).with_seqno(isn));
@@ -58,10 +61,12 @@ int main() {
         }
 
         {
+
             TCPConfig cfg;
             WrappingInt32 isn(rd());
             cfg.fixed_isn = isn;
 
+            //
             TCPSenderTestHarness test{"SYN acked, data", cfg};
             test.execute(ExpectState{TCPSenderStateSummary::SYN_SENT});
             test.execute(ExpectSegment{}.with_no_flags().with_syn(true).with_payload_size(0).with_seqno(isn));

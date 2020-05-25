@@ -1,5 +1,9 @@
 # lab guide reading
 
+//做这个lab的感悟 , 只要慢慢做 ,刚开始觉得难的问题都会解决掉 , 在最后完成的一刻感受到真正的喜悦
+//就跟着test case一个一个过 , 过程还是挺煎熬的, 稍微难的问题反馈都不及时,容易消磨掉耐心
+//远大的目标也一样 , 总之,基础核心架构组我来了
+
 职责: 从 byteStream 转换成 tcp segment (ip/udp datagram)
 
 整体思考模型: 和 receiver 一样,窗口,往窗口里填字节流
@@ -84,6 +88,9 @@ ackedWindowRight,
 unAckWindowRight,
 unAckWindowLeft = ackedWindowRight+1,
 
+
+func init()
+    
 
 
 func fill_window()
