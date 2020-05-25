@@ -33,7 +33,7 @@
 
 # Lab1 StreamReassembler
 
-[notes/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/reassembler.md)
+[notes/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/reassembler.txt)
 
 [Reassembler](https://github.com/carlclone/CS144/blob/master/libsponge/stream_reassembler.cc)
 
@@ -58,7 +58,7 @@
 
 # Lab2 TCPReceiver
 
-[note/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/receiver.md)
+[note/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/receiver.txt)
 [TCPReceiver](https://github.com/carlclone/CS144/blob/master/libsponge/tcp_receiver.cc)
 
 [sliding window 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=33)
@@ -84,7 +84,7 @@
 
 # Lab3 TCPSender
 
-[note/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/sender.md)
+[note/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/sender.txt)
 
 [TCPSender](https://github.com/carlclone/CS144/blob/master/libsponge/tcp_sender.cc)
 
