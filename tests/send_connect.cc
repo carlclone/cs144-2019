@@ -71,7 +71,7 @@ int main() {
             test.execute(ExpectState{TCPSenderStateSummary::SYN_SENT});
             test.execute(ExpectSegment{}.with_no_flags().with_syn(true).with_payload_size(0).with_seqno(isn));
             test.execute(ExpectBytesInFlight{1});
-            test.execute(AckReceived{WrappingInt32{isn + 1}});
+            test.execute(AckReceived{WrappingInt32{isn + 1}}); //todo;走到这一步
             test.execute(ExpectState{TCPSenderStateSummary::SYN_ACKED});
             test.execute(ExpectNoSegment{});
             test.execute(ExpectBytesInFlight{0});

@@ -68,9 +68,7 @@ running so that it will expire after RTO milliseconds (for the current value of 
 全定义为闭区间 , 初始化ackedWindow大小为0 , ackedleft=0 , ackedright=-1
 初始化unAckLeft=0 , unAckRight=-1
 
-                    unacked
-    acked      acked        unacked
-[                              ]
+
 
 property 
 
@@ -86,10 +84,30 @@ ackedWindowLeft,
 ackedWindowRight,
 
 unAckWindowRight,
-unAckWindowLeft = ackedWindowRight+1,
+unAckWindowLeft ,
 
 
+                        unacked
+ackedLeft          acked        unacked
+[                                      ]
+//整理窗口之间的关系 , 减少变量维护压力
+ackedLeft永远为初始值 , 即isn
+ackedRight在收到ack之后作出变动 , 取ackno和最大的一个期待的ackno的最小值
+unackedLeft = ackedRight+1 , 动态生成不需要维护
+unackedRight在首次发出segment之后根据发出的字节数维护 , syn和fin也要算1位
+
+
+
+
+
+//统一以isn为基准的64位index
 func init()
+    nextSeqno = isn
+    //his_window_size = ? //窗口在syn的ack了之后再初始化吧
+   ackedWindowLeft = isn
+   ackedWindowRight = -1
+   unAckLeft=0
+   unAckWindowRight = -1
     
 
 
@@ -99,6 +117,7 @@ if (!synced)
     segment.seqno = nextSeqno
     nextSeqno++;
     segment_out.push(seg);
+    unAckWindowRight++
     synced=true;
 if (!fined && stream_in.input_ended())
     segment.fin = true
@@ -112,7 +131,6 @@ if (stream_in.size>0 and his_window_size>0)
     segment.data = stream_in.pop_output(minSize)
     expectAckno = nextSeqno = nextSeqno+minSize-1+1
     segMap[expectAckno] = pair<segment,nowTime> //doubted , 用于超时重传
-    
     segment_out.push(seg)
 
 
@@ -123,8 +141,11 @@ if (ackno>=nextSeqno)
         if seg.expectAckno <= ackno
             del(segMap[ackno])
     
-    nextSeqno = min(ackno,nextSeqno) +1
+    ackedWindowRight = min(unackWindowRight,ackno)-1
     window_size = win_size
+    unAckedWindowLeft
+    
+    
     return true;    
 else
     return false
@@ -133,7 +154,7 @@ else
 //窗口里未被ack的字节数 , fin也算一个seqno !!
 func bytes_in_flight()
 //闭区间
-    return unAckWindowRight - unAckWindowLeft;
+    return unAckWindowRight - unAckWindowLeft +1;
 
 func tick(ms_since_last_tick)
     foreach (segmap as seg)
