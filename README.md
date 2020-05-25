@@ -18,6 +18,9 @@
 
 # Lab0 ByteStream
 
+[ByteStream](https://github.com/carlclone/CS144/blob/master/libsponge/byte_stream.cc)
+[webget.cc](https://github.com/carlclone/CS144/blob/master/apps/webget.cc)
+
 1.实现了一个`in-memory reliable ordered bystream`,做这个的目的是因为`tcp`实际上就是这样的一个可靠有序的字节流,不过是基于网络的,
 实现这一个小`lab`可以更好地理解了`tc`p两端的一些交互,
 比如说`http`的请求中,客户端发送完请求后会向服务端发送一个`SHUTDOWN_WRITE`的 信号,
@@ -28,6 +31,9 @@
 2.`webget`这个`task`用课程提供的虚拟镜像运行不了,折腾了好久,放到自己的`ubuntu16.04`里成功运行,越底层的语言开发环境越折磨人
 
 # Lab1 StreamReassembler
+
+[notes/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/reassembler.md)
+[Reassembler](https://github.com/carlclone/CS144/blob/master/libsponge/stream_reassembler.cc)
 
 1.lab1用了5，6个小时的时间才做完，测试用例有点难度
 
@@ -50,6 +56,9 @@
 
 # Lab2 TCPReceiver
 
+[note/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/receiver.md)
+[TCPReceiver](https://github.com/carlclone/CS144/blob/master/libsponge/tcp_receiver.cc)
+
 [sliding window 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=33)
 
 1.实现对 syn,fin,和带data 的 tcp segment 的接收,处理和响应
@@ -71,9 +80,10 @@
 9.写入 Reassembler 的时候要用absolute index, 从 0 开始的,不计算 syn 位的索引
 
 
-.....
+# Lab3 TCPSender
 
-
+[note/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/sender.md)
+[TCPSender](https://github.com/carlclone/CS144/blob/master/libsponge/tcp_sender.cc)
 
 
 
