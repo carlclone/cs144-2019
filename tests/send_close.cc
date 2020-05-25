@@ -69,7 +69,7 @@ int main() {
             test.execute(ExpectNoSegment{});
         }
 
-        {// 超时重传case
+        {//pass 超时重传case
             TCPConfig cfg;
             WrappingInt32 isn(rd());
             cfg.fixed_isn = isn;

@@ -104,19 +104,21 @@ if (stream_in.size>0 and his_window_size>0)
     minSize = min(in.size,his_window_size)
     segment.data = stream_in.pop_output(minSize)
     expectAckno = nextSeqno = nextSeqno+minSize-1+1
-    segMap[expectAckno] = segment //doubted , 用于超时重传
+    segMap[expectAckno] = pair<segment,nowTime> //doubted , 用于超时重传
+    
     segment_out.push(seg)
 
 
 func ack_received(ackno,win_size)
 
 if (ackno>=nextSeqno)
+    foreach(segMap as seg)
+        if seg.expectAckno <= ackno
+            del(segMap[ackno])
+    
     nextSeqno = min(ackno,nextSeqno) +1
-    if (isset(segMap[ackno]))
-        window_size = win_size
-        del(segMap[ackno])
-        return true; 
-        
+    window_size = win_size
+    return true;    
 else
     return false
 
@@ -127,4 +129,8 @@ func bytes_in_flight()
     return unAckWindowRight - unAckWindowLeft;
 
 func tick(ms_since_last_tick)
-
+    foreach (segmap as seg)
+        sendTime = seg.second
+        //超出时间窗口,触发重传
+        if sendTime+ms_since_last_tick >=sendTime+TIMEOUT_DFLT
+            segment_out.push(seg.first)
