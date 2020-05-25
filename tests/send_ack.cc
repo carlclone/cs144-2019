@@ -57,6 +57,7 @@ int main() {
         }
 
         {
+            //pass
             TCPConfig cfg;
             WrappingInt32 isn(rd());
             cfg.fixed_isn = isn;
@@ -68,6 +69,11 @@ int main() {
             test.execute(WriteBytes{"a"});
             test.execute(ExpectSegment{}.with_no_flags().with_data("a"));
             test.execute(ExpectNoSegment{});
+            /*方案1:需要排序,当某个seqno被ack了之后,这个segment之前的都需要被ack,取消重传
+             * 为什么会有一个那么大的ackno , 明明只发送了一个字节的数据 , 不算bug吗
+             * 这里看起来处理方案是取min(ackno,nextSeqno)
+             *
+             * */
             test.execute(AckReceived{WrappingInt32{isn + 17}});
             test.execute(ExpectSegment{}.with_seqno(isn + 2));
             test.execute(ExpectNoSegment{});

@@ -4,6 +4,8 @@
 
 整体思考模型: 和 receiver 一样,窗口,往窗口里填字节流
 
+干脆也以字节流的方式进行ack和重传吧? 而不是segment , 但是处理起来好像比较复杂
+
 ```
 • Keep track of the receiver’s window (processing incoming acknos and window sizes)
 
@@ -59,27 +61,70 @@ running so that it will expire after RTO milliseconds (for the current value of 
 ```
 # test case reading
 
-property nextSeqno , segMap , window_size
+全定义为闭区间 , 初始化ackedWindow大小为0 , ackedleft=0 , ackedright=-1
+初始化unAckLeft=0 , unAckRight=-1
+
+                    unacked
+    acked      acked        unacked
+[                              ]
+
+property 
+
+synced , fined
+
+nextSeqno ,  //下一个要被发出去的字节的seqno
+
+segMap ,  
+
+his_window_size //对方的window_size
+
+ackedWindowLeft,
+ackedWindowRight,
+
+unAckWindowRight,
+unAckWindowLeft = ackedWindowRight+1,
+
+
 
 func fill_window()
 if (!synced)
     segment.syn = true
+    segment.seqno = nextSeqno
+    nextSeqno++;
     segment_out.push(seg);
+    synced=true;
+if (!fined && stream_in.input_ended())
+    segment.fin = true
+    segment.seqno = nextSeqno
+    nextSeqno++;
+    segment_out.push(seg);
+    fined=true;
     
-if (stream_in.size>0 and window_size>0)
-    minSize = min(in.size,window_size)
+if (stream_in.size>0 and his_window_size>0)
+    minSize = min(in.size,his_window_size)
     segment.data = stream_in.pop_output(minSize)
-    ackno = nextSeqno+minSize-1+1
-    segMap[ackno] = segment
+    expectAckno = nextSeqno = nextSeqno+minSize-1+1
+    segMap[expectAckno] = segment //doubted , 用于超时重传
+    segment_out.push(seg)
 
 
 func ack_received(ackno,win_size)
-if (isset(segMap[ackno]))
-    window_size = win_size
-    del(segMap[ackno])
-    return true;    
 
+if (ackno>=nextSeqno)
+    nextSeqno = min(ackno,nextSeqno) +1
+    if (isset(segMap[ackno]))
+        window_size = win_size
+        del(segMap[ackno])
+        return true; 
+        
+else
+    return false
+
+   
+//窗口里未被ack的字节数 , fin也算一个seqno !!
 func bytes_in_flight()
+//闭区间
+    return unAckWindowRight - unAckWindowLeft;
 
 func tick(ms_since_last_tick)
 
