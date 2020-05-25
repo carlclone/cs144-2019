@@ -16,7 +16,7 @@
 
 
 
-# Lab0总结
+# Lab0 ByteStream
 
 1.实现了一个`in-memory reliable ordered bystream`,做这个的目的是因为`tcp`实际上就是这样的一个可靠有序的字节流,不过是基于网络的,
 实现这一个小`lab`可以更好地理解了`tc`p两端的一些交互,
@@ -27,7 +27,7 @@
 
 2.`webget`这个`task`用课程提供的虚拟镜像运行不了,折腾了好久,放到自己的`ubuntu16.04`里成功运行,越底层的语言开发环境越折磨人
 
-# Lab1总结
+# Lab1 StreamReassembler
 
 1.lab1用了5，6个小时的时间才做完，测试用例有点难度
 
@@ -48,7 +48,7 @@
 9 imple an out of order , repeat, overlapping , increment update , reliable reassembler
 
 
-# Lab2
+# Lab2 TCPReceiver
 
 [sliding window 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=33)
 
