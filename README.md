@@ -3,7 +3,7 @@
 - [x] Lab1 StreamReassembler
 - [x] Lab2 TCP Receiver
 - [x] Lab3 TCP Sender
-- [ ] Lab4 TCP Connection
+- [x] Lab4 TCP Connection
 - [ ] Lab5 NetWork Interface
 - [ ] Lab6 Router
 
