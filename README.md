@@ -22,6 +22,8 @@
 
 [webget.cc](https://github.com/carlclone/CS144/blob/master/apps/webget.cc)
 
+[guide](https://cs144.github.io/assignments/lab0.pdf]
+
 1.实现了一个`in-memory reliable ordered bystream`,做这个的目的是因为`tcp`实际上就是这样的一个可靠有序的字节流,不过是基于网络的,
 实现这一个小`lab`可以更好地理解了`tc`p两端的一些交互,
 比如说`http`的请求中,客户端发送完请求后会向服务端发送一个`SHUTDOWN_WRITE`的 信号,
@@ -36,6 +38,8 @@
 [notes/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/reassembler.txt)
 
 [Reassembler](https://github.com/carlclone/CS144/blob/master/libsponge/stream_reassembler.cc)
+
+[guide](https://cs144.github.io/assignments/lab1.pdf]
 
 1.lab1用了5，6个小时的时间才做完，测试用例有点难度
 
@@ -59,7 +63,10 @@
 # Lab2 TCPReceiver
 
 [note/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/receiver.txt)
+
 [TCPReceiver](https://github.com/carlclone/CS144/blob/master/libsponge/tcp_receiver.cc)
+
+[guide](https://cs144.github.io/assignments/lab2.pdf]
 
 [sliding window 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=33)
 
@@ -88,6 +95,12 @@
 
 [TCPSender](https://github.com/carlclone/CS144/blob/master/libsponge/tcp_sender.cc)
 
+[guide](https://cs144.github.io/assignments/lab3.pdf]
+
+
+# Lab4 TCPConnection
+
+[guide](https://cs144.github.io/assignments/lab4.pdf]
 
 
 # .
