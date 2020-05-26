@@ -102,6 +102,26 @@ unackedLeft = ackedRight+1 , 动态生成不需要维护
 unackedRight在首次发出segment之后根据发出的字节数维护 , syn和fin也要算1位
 
 
+# 重传策略思路整理
+
+记录上一次ack的时间,  用一个双端队列存储segment ,
+
+当有ack到的时候, 循环peek seqno最小的一个 , 如果segment的payload全部acked了 , 则pop_out,
+然后
+重置time_out= initial_value
+timer_base=now()
+consecutive_count=0
+
+
+然后是tick , 如果timer_base + time_out>= now , 并且还没有被ack 则重传, 并且把
+timeout*2 ,
+consecutive_count+=1;
+timer_base = now()
+
+# 考虑抽离出timer的逻辑
+
+
+
 
 
 
@@ -124,29 +144,35 @@ if (!synced)
     segment_out.push(seg);
     unAckWindowRight++
     synced=true;
+    expectAckno = nextSeqno;
+    segmap[expectAckno] = pair<segment,nowTime>
 if (!fined && stream_in.input_ended())
     segment.fin = true
     segment.seqno = nextSeqno
     nextSeqno++;
     segment_out.push(seg);
     fined=true;
+    expectAckno = nextSeqno;
+    segmap[expectAckno] = pair<segment,nowTime>
     
 if (stream_in.size>0 and his_window_size>0)
     minSize = min(in.size,his_window_size)
     segment.data = stream_in.pop_output(minSize)
     expectAckno = nextSeqno = nextSeqno+minSize-1+1
-    segMap[expectAckno] = pair<segment,nowTime> //doubted , 用于超时重传
+    timeout = TIMEOUT_DFLT
+    segMap[expectAckno] = pair<segment,nowTime,timeout> //doubted , 用于超时重传
     segment_out.push(seg)
+    unackedRight +=minSize
 
 
 func ack_received(ackno,win_size)
 
 if (ackno>=nextSeqno)
     foreach(segMap as seg)
-        if seg.expectAckno <= ackno
+        if seg.expectAckno < ackno
             del(segMap[ackno])
     
-    ackedWindowRight = min(unackWindowRight,ackno)-1
+    ackedWindowRight = min(unackWindowRight,ackno-1)
     window_size = win_size
     unAckedWindowLeft
     
@@ -161,9 +187,35 @@ func bytes_in_flight()
 //闭区间
     return unAckWindowRight - unAckWindowLeft +1;
 
+//deciding if the oldest-sent segment has been outstanding for too long
+  without acknowledgment
+  //好像每次tick只重传最久的一个seg
+  //Retransmit the earliest (lowest sequence number) segment that hasn’t been fully
+    acknowledged
 func tick(ms_since_last_tick)
-    foreach (segmap as seg)
+    foreach (segmap as k=>seg)
         sendTime = seg.second
         //超出时间窗口,触发重传
-        if sendTime+ms_since_last_tick >=sendTime+TIMEOUT_DFLT
+        if sendTime+ms_since_last_tick >=sendTime+ seg.third
             segment_out.push(seg.first)
+            //exponential back-off
+            seg.third = 2*seg.third
+            seg.second = now()
+            segmap[k] = seg
+
+
+//连续重传的次数 , 是指一个seg还是多个seg , 如何定义"连续" , 看下guide
+
+//If the window size is nonzero: //为什么要有这个window_size判断
+  i. Keep track of the number of consecutive retransmissions, and increment it
+  because you just retransmitted something. Your TCPConnection will use this
+  information to decide if the connection is hopeless (too many consecutive
+  retransmissions in a row) and needs to be aborted.
+  ii. Double the value of RTO.3
+
+func consecutive_retransmissions()
+    return consecutive_count;
+
+//生成空payload segment
+func send_empty_segment()
+

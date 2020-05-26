@@ -15,7 +15,9 @@ int main() {
     try {
         auto rd = get_random_generator();
 
-        {
+        //pass
+        {//重传两次 , then ack
+
             TCPConfig cfg;
             WrappingInt32 isn(rd());
             uint16_t retx_timeout = uniform_int_distribution<uint16_t>{10, 10000}(rd);
@@ -26,14 +28,14 @@ int main() {
             test.execute(ExpectSegment{}.with_no_flags().with_syn(true).with_payload_size(0).with_seqno(isn));
             test.execute(ExpectNoSegment{});
             test.execute(ExpectState{TCPSenderStateSummary::SYN_SENT});
-            test.execute(Tick{retx_timeout - 1u});
+            test.execute(Tick{retx_timeout - 1u}); //差触发还有1秒
             test.execute(ExpectNoSegment{});
-            test.execute(Tick{1});
+            test.execute(Tick{1}); //触发重传
             test.execute(ExpectSegment{}.with_no_flags().with_syn(true).with_payload_size(0).with_seqno(isn));
             test.execute(ExpectState{TCPSenderStateSummary::SYN_SENT});
             test.execute(ExpectBytesInFlight{1});
             // Wait twice as long b/c exponential back-off
-            test.execute(Tick{2 * retx_timeout - 1u});
+            test.execute(Tick{2 * retx_timeout - 1u}); //todo;需要实现 exponential back-off
             test.execute(ExpectNoSegment{});
             test.execute(Tick{1});
             test.execute(ExpectSegment{}.with_no_flags().with_syn(true).with_payload_size(0).with_seqno(isn));
@@ -44,7 +46,8 @@ int main() {
             test.execute(ExpectBytesInFlight{0});
         }
 
-        {
+        {// pass
+            //重传syn太多次,终止case
             TCPConfig cfg;
             WrappingInt32 isn(rd());
             uint16_t retx_timeout = uniform_int_distribution<uint16_t>{10, 10000}(rd);
@@ -67,7 +70,7 @@ int main() {
             test.execute(Tick{1}.with_max_retx_exceeded(true));
         }
 
-        {
+        {//
             TCPConfig cfg;
             WrappingInt32 isn(rd());
             uint16_t retx_timeout = uniform_int_distribution<uint16_t>{10, 10000}(rd);

@@ -9,6 +9,7 @@
 
 using namespace std;
 
+//课程自测case
 void check_equivalent_segments(const TCPSegment &a, const TCPSegment &b) {
     if (not(a.header() == b.header())) {
         cerr << a.header().to_string() << endl;
