@@ -70,7 +70,7 @@ int main() {
             test.execute(Tick{1}.with_max_retx_exceeded(true));
         }
 
-        {//
+        {//pass
             TCPConfig cfg;
             WrappingInt32 isn(rd());
             uint16_t retx_timeout = uniform_int_distribution<uint16_t>{10, 10000}(rd);

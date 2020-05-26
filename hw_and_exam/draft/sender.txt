@@ -122,7 +122,9 @@ timer_base = now()
 
 
 
+# 目前的模型
 
+一个窗口 , 一个timer , 一个未ack的segment有序队列
 
 
 //统一以isn为基准的64位index
