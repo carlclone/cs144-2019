@@ -99,6 +99,8 @@ class TCPConnection {
     TCPConnection(const TCPConnection &other) = delete;
     TCPConnection &operator=(const TCPConnection &other) = delete;
     //!@}
+    void set_to_rst();
+    TCPSegment generate_rst_segment();
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_FACTORED_HH

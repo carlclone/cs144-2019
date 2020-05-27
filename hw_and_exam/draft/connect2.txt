@@ -1,0 +1,2 @@
+
+func seg_receiver(seg)
