@@ -122,6 +122,9 @@ optional<WrappingInt32> TCPReceiver::ackno() const {
     return optional<WrappingInt32>{};
 }
 
+/*
+ * hat window size should I send if theTCPReceiverwants to advertise a window sizethat’s bigger than will fit in theTCPSegment::header().winfield?Send the biggest value you can.  You might find thestd::numericlimitsclass helpful.
+ */
 size_t TCPReceiver::window_size() const {
     //cap - bytesinstream
     return stream_out().remaining_capacity();

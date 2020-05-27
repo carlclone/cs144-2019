@@ -48,7 +48,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 
     /*
      * This flag (“reset”) means instant death to the connection.
-     * If you receive a segmentwithrst,
+     * If you receive a segment with rst,
      * you should set the error flag on the inbound
      * and outboundByteStreams,
      * and any subsequent call toTCPConnection::active()
@@ -62,6 +62,13 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      * about on incoming segments:ackno and window size
      */
     if (header.ack) {
+        /*
+         * Okay, fine.  How about if theTCPConnectionreceived a segment, and
+         * theTCPSendercomplains
+         * that anacknowas invalid (ackreceived()returns false)?
+         *
+         * same as receiver
+         */
         _sender.ack_received(header.ackno,header.win);
     }
 
@@ -72,8 +79,15 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      * and give the segment to theTCPReceiver
      * so it can inspect the fields it cares about
      * on incoming segments:seqno,syn,payload, and fin
+     *
+     * On receiving a segment, what should I do if theTCPReceivercomplains
+     * that the segmentdidn’t overlap the window and was unacceptable
+     * (segmentreceived()returns false)?In that situation,
+     * theTCPConnectionneeds to make sure that a segment is
+     * sent back tothe peer, giving the currentacknoandwindowsize.
+     * This can help correct a confusedpeer.
      */
-    _receiver.segment_received(seg);
+    auto receiverSuccess = _receiver.segment_received(seg);
 
     /*
      * TheTCPConnection will send TCPSegments over the Internet:•
@@ -104,11 +118,21 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
         ongoingSeg.header().win = _receiver.window_size();
     }
 
-    segments_out().push(ongoingSeg);
+    if (ongoingSeg.length_in_sequence_space()>0) {
+        segments_out().push(ongoingSeg);
+    }
+
 }
 
 
 bool TCPConnection::active() const {
+/*
+ * When this happens, the implementation releases its exclusive claim to a local
+port number, stops sending acknowledgments in reply to incoming segments, considers the
+connection to be history, and has its
+active()
+method return false
+ */
     return true;
 }
 
@@ -173,6 +197,8 @@ void TCPConnection::set_to_rst() {
      * Sending a segment withrstset has a similar effect to
      * receiving one:  the connection isdead and no longeractive(),
      * and bothByteStreams should be set to the error state.
+     *
+     *
      */
 }
 
@@ -191,3 +217,52 @@ TCPSegment TCPConnection::generate_rst_segment() {
      */
     return {};
 }
+
+
+//shutdown todo;
+
+/*
+ * In an
+unclean shutdown
+, the
+TCPConnection
+either sends or receives a segment with the
+rst
+flag set.  In this case, the outbound and
+inbound
+ByteStream
+s should both be in the
+error
+state, and
+active()
+can return false
+immediately.
+
+
+ clean shutdown :
+ Practically what all this means is that your TCPConnection
+has a member variable called linger after streams finish
+,  exposed  to  the  testing  apparatus  through  the state()
+method.  The variable starts out true
+.  If the inbound stream ends before the
+TCPConnection
+has reached EOF on its outbound stream, this variable needs to be set to
+false
+.
+At any point where prerequisites #1 through #3 are satisfied, the connection is “done” (and
+active()
+should return
+false
+) if
+linger
+after
+streams
+finish
+is false.  Otherwise you
+need to linger:  the connection is only done after enough time (10
+×
+cfg.rt
+timeout
+) has
+elapsed since the last segment was received.
+ */
