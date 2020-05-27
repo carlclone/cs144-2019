@@ -30,7 +30,12 @@ class TCPSender {
     ByteStream _stream;
 
     //! the (absolute) sequence number for the next byte to be sent
-    uint64_t _next_seqno{0};
+    uint64_t _next_seqno{0}; //用的绝对值,还不算 syn 和 fin
+
+    unsigned int consecutiveCount , hisWindowSize;
+    uint64_t unAckWindowLeft,unAckWindowRight;
+    bool syncSent,finSent;
+    std::queue<TCPSegment> retxQueue;
 
   public:
     //! Initialize a TCPSender

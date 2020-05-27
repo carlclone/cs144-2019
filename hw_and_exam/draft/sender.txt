@@ -130,7 +130,7 @@ timer_base = now()
 //统一以isn为基准的64位index
 func init()
     nextSeqno = isn
-    //his_window_size = ? //窗口在syn的ack了之后再初始化吧
+    //his_window_size = 1 //窗口在syn的ack了之后再初始化吧
    ackedWindowLeft = isn
    ackedWindowRight = -1
    unAckLeft=0
@@ -149,16 +149,21 @@ if (!synced)
     expectAckno = nextSeqno;
     segmap[expectAckno] = pair<segment,nowTime>
 if (!fined && stream_in.input_ended())
+//minSize = min(in.size,his_window_size - bytes_in_flight())
+//if minSize!=0
     segment.fin = true
     segment.seqno = nextSeqno
     nextSeqno++;
+    withPayload() //复制下面的逻辑
     segment_out.push(seg);
+    unAckWindowRight++
     fined=true;
     expectAckno = nextSeqno;
     segmap[expectAckno] = pair<segment,nowTime>
+
     
 if (stream_in.size>0 and his_window_size>0)
-    minSize = min(in.size,his_window_size)
+    minSize = min(in.size,his_window_size - bytes_in_flight())
     segment.data = stream_in.pop_output(minSize)
     expectAckno = nextSeqno = nextSeqno+minSize-1+1
     timeout = TIMEOUT_DFLT

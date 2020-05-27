@@ -20,23 +20,55 @@ using namespace std;
 TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const std::optional<WrappingInt32> fixed_isn)
     : _isn(fixed_isn.value_or(WrappingInt32{random_device()()}))
     , _initial_retransmission_timeout{retx_timeout}
-    , _stream(capacity) {}
+    , _stream(capacity)
+    , consecutiveCount(0)
+    , unAckWindowLeft(0)
+    , unAckWindowRight(0)  //无符号数,得把区间定义改成前闭后开了
+    , syncSent(false)
+    , finSent(false)
+    , hisWindowSize(1) {}
 
-uint64_t TCPSender::bytes_in_flight() const { return {}; }
+uint64_t TCPSender::bytes_in_flight() const { return unAckWindowRight - unAckWindowLeft; }
 
-void TCPSender::fill_window() {}
+void TCPSender::fill_window() {
+    if (!syncSent) {
+        TCPSegment seg;
+        seg.header().syn = true;
+        seg.header().seqno = _isn;
+        _next_seqno++;
+        segments_out().push(seg);
+        syncSent = true;
+        /*
+         * 维护窗口
+         */
+        unAckWindowRight++;
+        /*
+         * 重传相关实现
+         */
+        retxQueue.push(seg);
+    }
+
+    auto remainWindowSize = hisWindowSize - bytes_in_flight();
+    if (stream_in().buffer_size() > 0 && remainWindowSize > 0) {
+        auto minSize = min(stream_in().buffer_size(),remainWindowSize);
+        TCPSegment seg;
+        /*
+         * 关闭
+         */
+        if (stream_in().input_ended()) {
+            seg.header().fin = true;
+        }
+    }
+}
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size The remote receiver's advertised window size
 //! \returns `false` if the ackno appears invalid (acknowledges something the TCPSender hasn't sent yet)
-bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
-    DUMMY_CODE(ackno, window_size);
-    return {};
-}
+bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {}
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) { DUMMY_CODE(ms_since_last_tick); }
 
-unsigned int TCPSender::consecutive_retransmissions() const { return {}; }
+unsigned int TCPSender::consecutive_retransmissions() const { return consecutiveCount; }
 
 void TCPSender::send_empty_segment() {}
