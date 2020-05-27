@@ -1,6 +1,20 @@
 
-property :
+Warning: Unclean shutdown of TCPConnection
+The TCP was in state
+`sender=`stream ongoing`,
+ receiver=`waiting for stream to begin (listening for SYN)`,
+ active=1,
+ linger_after_streams_finish=1`,
 
+ but it was expected to be in state
+ `sender=`stream started but nothing acknowledged`,
+ receiver=`waiting for stream to begin (listening for SYN)`,
+ active=1,
+ linger_after_streams_finish=1`
+
+
+property :
+expectingSyn
 
 func connect()
     sender.fill_window()

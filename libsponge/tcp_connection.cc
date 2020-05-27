@@ -32,13 +32,23 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 //    timeSinceLastSegmentReceived=0;
 
 
+
     //This flag (“reset”) means instant death to the connection. If you receive a segment
     //with rst , you should set the error flag on the inbound and outbound ByteStreams,
     //and any subsequent call to TCPConnection::active() should return false.
     auto header= seg.header();
     auto payload=seg.serialize();
+    if (expectingSyn && !header.syn) {
+        return;
+    } else {
+        expectingSyn=false;
+    }
     if (header.ack) {
         _sender.ack_received(header.ackno,header.win);
+    }
+
+    if (seg.length_in_sequence_space()==0) {
+        return;
     }
     _receiver.segment_received(seg);
 
@@ -52,7 +62,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
     std::optional<WrappingInt32> ackno = _receiver.ackno();
     if (ackno.has_value()) {
         ongoingSeg.header().ack = true;
-        ongoingSeg.header().ackno = ackno;
+        ongoingSeg.header().ackno = ackno.value();
         ongoingSeg.header().win = _receiver.window_size();
     }
 
@@ -61,7 +71,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 
 
 bool TCPConnection::active() const {
-    return {};
+    return true;
 }
 
 size_t TCPConnection::write(const string &data) {
@@ -80,6 +90,10 @@ void TCPConnection::end_input_stream() {
 
 void TCPConnection::connect() {
     _sender.fill_window();
+    segments_out().push(_sender.segments_out().front());
+    _sender.segments_out().pop();
+    _linger_after_streams_finish=true;
+    expectingSyn=true;
 }
 
 TCPConnection::~TCPConnection() {

@@ -82,7 +82,7 @@ int main() {
         }
 
         // test #3: START -> SYN_SENT -> SYN/ACK -> ESTABLISHED
-        {
+        {//pass
             TCPTestHarness test_3(cfg);
 
             test_3.execute(Connect{});

@@ -22,6 +22,7 @@ class TCPConnection {
     bool _linger_after_streams_finish{true};
 
     size_t timeSinceLastSegmentReceived;
+    bool expectingSyn;
 
   public:
     //! \name "Input" interface for the writer
@@ -83,7 +84,9 @@ class TCPConnection {
     //!@}
 
     //! Construct a new connection from a configuration
-    explicit TCPConnection(const TCPConfig &cfg) : _cfg{cfg} {}
+    explicit TCPConnection(const TCPConfig &cfg) :
+        _cfg{cfg},
+        timeSinceLastSegmentReceived(0), expectingSyn(false){}
 
     //! \name construction and destruction
     //! moving is allowed; copying is disallowed; default construction not possible
