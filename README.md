@@ -91,11 +91,30 @@
 
 # Lab3 TCPSender
 
+2020/05/24 ~ 05/27
+
 [note/pesudo](https://github.com/carlclone/CS144/blob/master/hw_and_exam/draft/sender.txt)
 
 [TCPSender](https://github.com/carlclone/CS144/blob/master/libsponge/tcp_sender.cc)
 
 [guide](https://cs144.github.io/assignments/lab3.pdf]
+
+1.超时机制是 exponential backoff , 指数补偿
+
+2.下一个 lab 还是多写点 helper 吧
+
+3.fin 也占一个窗口位
+
+4.只要收到 ack 就要更新窗口
+
+5.cpp 的 list 遍历,erase 后返回下一个 iterator 的指针 
+
+6.segfault 要怎么调试?
+
+7.前闭后开区间的意义: unsigned int 不能为负值,前闭后开可以定义大小为 0 的区间
+
+8.初始 windowSize 为 1 (发 syn)
+
 
 
 # Lab4 TCPConnection
