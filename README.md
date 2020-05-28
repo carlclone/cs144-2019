@@ -18,6 +18,12 @@
 
 [guide](https://cs144.github.io/assignments/lab4.pdf)
 
+[finite state machine 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=28)
+
+1. fsm是(finite state machine)的缩写,有限状态机
+
+
+
 
 # Lab3 TCPSender
 
