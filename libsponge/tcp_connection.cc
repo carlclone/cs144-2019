@@ -180,12 +180,15 @@ size_t TCPConnection::write(const string &data) {
 
 //! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
 void TCPConnection::tick(const size_t ms_since_last_tick) {
-    _sender.fill_window();
-    while  (_sender.segments_out().size()>0) {
-        auto seg = _sender.segments_out().front();
-        _sender.segments_out().pop();
-        segments_out().push(seg);
+    if (state()==TCPState::State::ESTABLISHED) {
+        _sender.fill_window();
+        while  (_sender.segments_out().size()>0) {
+            auto seg = _sender.segments_out().front();
+            _sender.segments_out().pop();
+            segments_out().push(seg);
+        }
     }
+
     DUMMY_CODE(ms_since_last_tick);
     /*
      * there are two situations where you’ll want to abort the entire
