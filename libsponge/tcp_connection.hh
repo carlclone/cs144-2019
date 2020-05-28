@@ -102,6 +102,8 @@ class TCPConnection {
     TCPSegment generate_rst_segment();
     void doReset(bool sned=true);
     void askReceiver(TCPSegment &ongoingSeg) const;
+    void sendOut();
+    void print();
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_FACTORED_HH

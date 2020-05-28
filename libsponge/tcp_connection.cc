@@ -45,8 +45,6 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
         if (!header.syn) {
             return;
         }
-
-
     }
 
     if (state()==TCPState::State::LISTEN) {
@@ -56,9 +54,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
         if (!header.syn) {
             return;
         }
-
     }
-
 
 
     if (header.rst && header.seqno!=_receiver.ackno()) {
@@ -69,8 +65,6 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
         doReset();
         return;
     }
-
-
 
     /*
      * if the ack flag is set, tell theTCP Sender about the fields it cares
@@ -118,13 +112,44 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      * (seqno,syn,payload, andfin).
      *
      */
-    TCPSegment ongoingSeg;
+    //TCPSegment ongoingSeg;
     _sender.fill_window();
     if (_sender.segments_out().size()==0) {
         _sender.send_empty_segment();
     }
-    ongoingSeg = _sender.segments_out().front();
+    if(_sender.segments_out().size()==0) {
+        return;
+    }
+    auto seg1 = _sender.segments_out().front();
+//    if (seg.header().fin) {
+//        cout<<"size";
+//        cout<<_sender.segments_out().size();
+//        cout<<seg1.header().ackno;
+//    }
+
     _sender.segments_out().pop();
+    if (_receiver.ackno().has_value()) {
+        seg1.header().ack = true;
+        seg1.header().ackno = _receiver.ackno().value();
+        if (seg.header().fin) {
+            //cout << _receiver.ackno().value();
+            //cout<<_sender.segments_out().size();
+            //seg1.header().ackno = WrappingInt32(3);
+        }
+
+        seg1.header().win = _receiver.window_size();
+    }
+//    if (seg.header().fin) {
+//        cout<<"size";
+//        cout<<_sender.segments_out().size();
+//        cout<<seg1.header().ackno;
+//        cout <<segments_out().size();
+//    }
+    segments_out().push(seg1);
+//    if (seg.header().fin) {
+//
+//        cout <<segments_out().size();
+//    }
 
     /*
      * Before  sending  the  segment,  theTCPConnection
@@ -134,19 +159,14 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      * If there is anackno,1
      * it will set theackflag and the fields in theTCPSegment.
      */
-    askReceiver(ongoingSeg);
-
-    segments_out().push(ongoingSeg);
-
-
+    //sendOut();
 }
 void TCPConnection::askReceiver(TCPSegment &ongoingSeg) const {
-    optional<WrappingInt32> ackno = _receiver.ackno();
+    auto ackno = _receiver.ackno();
     if (ackno.has_value()) {
         ongoingSeg.header().ack = true;
         ongoingSeg.header().ackno = ackno.value();
         ongoingSeg.header().win = _receiver.window_size();
-
     }
 }
 
@@ -180,6 +200,10 @@ size_t TCPConnection::write(const string &data) {
     return size;
 }
 
+void TCPConnection::print() {
+    cout << _receiver.ackno().value();
+}
+
 //! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
 void TCPConnection::tick(const size_t ms_since_last_tick) {
     timeSinceLastSegmentReceived+=ms_since_last_tick;
@@ -196,15 +220,8 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
         }
     }
 
-    while  (_sender.segments_out().size()>0) {
-        auto seg = _sender.segments_out().front();
+    sendOut();
 
-        _sender.segments_out().pop();
-        askReceiver(seg);
-        segments_out().push(seg);
-    }
-
-    DUMMY_CODE(ms_since_last_tick);
     /*
      * there are two situations where you’ll want to abort the entire
      * connection:
@@ -217,22 +234,25 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
 
     //todo;
 }
+void TCPConnection::sendOut() {
+    while  (_sender.segments_out().size()>0) {
+        auto seg = _sender.segments_out().front();
 
-
+        _sender.segments_out().pop();
+        askReceiver(seg);
+        segments_out().push(seg);
+    }
+}
 
 void TCPConnection::end_input_stream() {
     _sender.stream_in().end_input();
     _sender.fill_window();
-    auto seg = _sender.segments_out().front();
-    askReceiver(seg);
-    segments_out().push(seg);
-    _sender.segments_out().pop();
+    sendOut();
 }
 
 void TCPConnection::connect() {
     _sender.fill_window();
-    segments_out().push(_sender.segments_out().front());
-    _sender.segments_out().pop();
+    sendOut();
     _linger_after_streams_finish=true;
 }
 
@@ -267,6 +287,19 @@ TCPConnection::~TCPConnection() {
  * and any subsequent call toTCPConnection::active()
  * should return false.
  */
+
+/*
+ * Wait, but how do I even make a segment that I can set
+ * the rst flag on?  What’s thesequence number?
+ *
+ * Any outgoing segment needs to have the proper sequence number.
+ * You can force theTCPSenderto generate an empty segment with
+ * the proper sequence number by calling its send empty segment()
+ * method.  Or you can make it fill the window
+ * (generatingsegmentsifit  has  outstanding
+ * information  to  send,  e.g.  bytes  from  the
+ * stream  orSYN/FIN) by calling itsfillwindow()method.
+ */
 void TCPConnection::doReset(bool send) {
     _receiver.stream_out().set_error();
     _sender.stream_in().set_error();
@@ -281,21 +314,6 @@ void TCPConnection::doReset(bool send) {
 
 }
 
-TCPSegment TCPConnection::generate_rst_segment() {
-    /*
-     * Wait, but how do I even make a segment that I can set
-     * the rst flag on?  What’s thesequence number?
-     *
-     * Any outgoing segment needs to have the proper sequence number.
-     * You can force theTCPSenderto generate an empty segment with
-     * the proper sequence number by calling its send empty segment()
-     * method.  Or you can make it fill the window
-     * (generatingsegmentsifit  has  outstanding
-     * information  to  send,  e.g.  bytes  from  the
-     * stream  orSYN/FIN) by calling itsfillwindow()method.
-     */
-    return {};
-}
 
 
 //shutdown todo;
