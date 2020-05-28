@@ -44,22 +44,17 @@ void TCPSender::fill_window() {
         seg.header().seqno = next_seqno();
         _next_seqno++;
 
-        /*
-         * 维护窗口
-         */
         unAckWindowRight++;
-        /*
-         * 重传相关实现
-         */
-        // retxList.push(seg);
 
+        if (seg.length_in_sequence_space()) {
+            segments_out().push(seg);
+            retxList.push_front(seg);
+        }
     } else {
         seg.header().seqno = next_seqno();
 
         auto remainWindowSize = hisWindowSize - bytes_in_flight();
-        /*
-         * 关闭
-         */
+
         if (stream_in().input_ended() && remainWindowSize>0 ) {
             finSent = true;
 
@@ -72,10 +67,7 @@ void TCPSender::fill_window() {
 
         if (stream_in().buffer_size() > 0 && remainWindowSize > 0) {
             auto minSize = min(stream_in().buffer_size(), remainWindowSize);
-
-            /*
-             * payload
-             */
+            minSize = min(minSize,TCPConfig::MAX_PAYLOAD_SIZE);
 
             Buffer buf{stream_in().peek_output(minSize)};
             stream_in().pop_output(minSize);
@@ -83,17 +75,40 @@ void TCPSender::fill_window() {
             seg.payload() = buf;
             _next_seqno += minSize;
 
-            /*
-             * 维护窗口
-             */
+            remainWindowSize-=minSize;
             unAckWindowRight += minSize;
         }
+
+        if (seg.length_in_sequence_space()) {
+            segments_out().push(seg);
+            retxList.push_front(seg);
+        }
+
+        while (stream_in().buffer_size() > 0 && remainWindowSize > 0) {
+            TCPSegment tmpSeg;
+            tmpSeg.header().seqno = next_seqno();
+            auto minSize = min(stream_in().buffer_size(), remainWindowSize);
+            minSize = min(minSize,TCPConfig::MAX_PAYLOAD_SIZE);
+            Buffer buf{stream_in().peek_output(minSize)};
+            stream_in().pop_output(minSize);
+
+            tmpSeg.payload() = buf;
+            _next_seqno += minSize;
+
+            remainWindowSize-=minSize;
+            unAckWindowRight += minSize;
+            if (tmpSeg.length_in_sequence_space()) {
+                segments_out().push(tmpSeg);
+                retxList.push_front(tmpSeg);
+            }
+        }
+
+
     }
 
-    if (seg.length_in_sequence_space()) {
-        segments_out().push(seg);
-        retxList.push_front(seg);
-    }
+
+
+
 }
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)

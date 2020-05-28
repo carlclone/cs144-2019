@@ -41,7 +41,7 @@ size_t ByteStream::write(const string &data) {
     }
     bytesWriteTotal+=minSize;
     bytesInPipe+=minSize;
-    return i;
+    return minSize;
 }
 
 /*

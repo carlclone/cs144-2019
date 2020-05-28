@@ -34,6 +34,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 
     if (state()==TCPState::State::SYN_SENT) {
         if (header.ack && header.ackno!=_sender.next_seqno()) {
+
             if (header.rst) {
                 return;
             }
@@ -55,18 +56,16 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 
 
     }
-    //bool setSyn = false;
+
     if (state()==TCPState::State::LISTEN) {
-        if (!header.ack && !header.syn) {
-            return;
-        }
-        if (header.syn) {
-            //setSyn=true;
-        }
         if (header.ack) {
             doReset();
             return;
         }
+        if (!header.syn) {
+            return;
+        }
+
     }
 
 
@@ -87,6 +86,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      * about on incoming segments:ackno and window size
      */
     bool ackSuccess=false , recvSuccess= false;
+    bool seqnoIsCorrect = header.seqno == _receiver.ackno();
     if (header.ack) {
         /*
          * Okay, fine.  How about if theTCPConnection received a segment, and
@@ -113,7 +113,10 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 
     recvSuccess = _receiver.segment_received(seg);
 
-    if (ackSuccess && recvSuccess && payload.size()==0) {
+    if (ackSuccess && recvSuccess
+        && seg.length_in_sequence_space()==0
+        && seqnoIsCorrect
+        ) {
         return;
     }
 
@@ -171,11 +174,18 @@ bool TCPConnection::active() const {
 }
 
 size_t TCPConnection::write(const string &data) {
-    return _sender.stream_in().write(data);
+    auto size =  _sender.stream_in().write(data);
+    return size;
 }
 
 //! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
 void TCPConnection::tick(const size_t ms_since_last_tick) {
+    _sender.fill_window();
+    while  (_sender.segments_out().size()>0) {
+        auto seg = _sender.segments_out().front();
+        _sender.segments_out().pop();
+        segments_out().push(seg);
+    }
     DUMMY_CODE(ms_since_last_tick);
     /*
      * there are two situations where you’ll want to abort the entire

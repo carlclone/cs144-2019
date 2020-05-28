@@ -49,11 +49,7 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
     }
 
     if (data.size()==0) {
-        auto headerSeq = unwrap(header.seqno,hisIsn,nextSeqno); //116
 
-        if (headerSeq!=nextSeqno) {
-            return false;
-        }
         if (closeInput) {
             stream_out().end_input();
             nextSeqno+=1;
