@@ -29,52 +29,42 @@ size_t TCPConnection::time_since_last_segment_received() const {
 }
 
 void TCPConnection::segment_received(const TCPSegment &seg) {
-
-
-
-
-
-
     auto header= seg.header();
     auto payload=seg.serialize();
 
-
-    if (!expectingSyn) {
-        return;
+    if (state()==TCPState::State::SYN_SENT) {
+        if (!header.syn) {
+            return;
+        }
     }
-    if (expectingSyn && !header.syn) {
-        return;
+    //bool setSyn = false;
+    if (state()==TCPState::State::LISTEN) {
+        if (!header.ack && !header.syn) {
+            return;
+        }
+        if (header.syn) {
+            //setSyn=true;
+        }
     }
 
-    /*
-     * This flag (“reset”) means instant death to the connection.
-     * If you receive a segment with rst,
-     * you should set the error flag on the inbound
-     * and outboundByteStreams,
-     * and any subsequent call toTCPConnection::active()
-     * should return false.
-     */
 
-    //todo;
 
     /*
      * if the ack flag is set, tell theTCP Sender about the fields it cares
      * about on incoming segments:ackno and window size
      */
+    bool ackSuccess=false , recvSuccess= false;
     if (header.ack) {
         /*
-         * Okay, fine.  How about if theTCPConnectionreceived a segment, and
-         * theTCPSendercomplains
-         * that anacknowas invalid (ackreceived()returns false)?
+         * Okay, fine.  How about if theTCPConnection received a segment, and
+         * theTCPSender complains
+         * that an ackno was invalid (ack received() returns false)?
          *
          * same as receiver
          */
-        _sender.ack_received(header.ackno,header.win);
+        ackSuccess = _sender.ack_received(header.ackno,header.win);
     }
 
-    if (seg.length_in_sequence_space()==0) {
-        return;
-    }
     /*
      * and give the segment to theTCPReceiver
      * so it can inspect the fields it cares about
@@ -87,7 +77,12 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      * sent back tothe peer, giving the currentacknoandwindowsize.
      * This can help correct a confusedpeer.
      */
-    auto receiverSuccess = _receiver.segment_received(seg);
+
+    recvSuccess = _receiver.segment_received(seg);
+
+    if (ackSuccess && recvSuccess) {
+        return;
+    }
 
     /*
      * TheTCPConnection will send TCPSegments over the Internet:•
@@ -97,6 +92,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      *
      */
     TCPSegment ongoingSeg;
+    _sender.fill_window();
     if (_sender.segments_out().size()==0) {
         _sender.send_empty_segment();
     }
@@ -116,16 +112,16 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
         ongoingSeg.header().ack = true;
         ongoingSeg.header().ackno = ackno.value();
         ongoingSeg.header().win = _receiver.window_size();
+
     }
 
-    if (ongoingSeg.length_in_sequence_space()>0) {
-        segments_out().push(ongoingSeg);
-    }
+    segments_out().push(ongoingSeg);
+
 
 }
 
 
-bool TCPConnection::active() const {
+
 /*
  * When this happens, the implementation releases its exclusive claim to a local
 port number, stops sending acknowledgments in reply to incoming segments, considers the
@@ -133,6 +129,9 @@ connection to be history, and has its
 active()
 method return false
  */
+bool TCPConnection::active() const {
+
+
     return true;
 }
 
@@ -166,7 +165,6 @@ void TCPConnection::connect() {
     segments_out().push(_sender.segments_out().front());
     _sender.segments_out().pop();
     _linger_after_streams_finish=true;
-    expectingSyn=true;
 }
 
 TCPConnection::~TCPConnection() {
@@ -192,14 +190,18 @@ TCPConnection::~TCPConnection() {
 
 // helpers
 
-void TCPConnection::set_to_rst() {
-    /*
-     * Sending a segment withrstset has a similar effect to
-     * receiving one:  the connection isdead and no longeractive(),
-     * and bothByteStreams should be set to the error state.
-     *
-     *
-     */
+/*
+ * This flag (“reset”) means instant death to the connection.
+ * If you receive a segment with rst,
+ * you should set the error flag on the inbound
+ * and outboundByteStreams,
+ * and any subsequent call toTCPConnection::active()
+ * should return false.
+ */
+void TCPConnection::doReset() {
+    _receiver.stream_out().set_error();
+    _sender.stream_in().set_error();
+
 }
 
 TCPSegment TCPConnection::generate_rst_segment() {

@@ -22,7 +22,6 @@ class TCPConnection {
     bool _linger_after_streams_finish{true};
 
     size_t timeSinceLastSegmentReceived;
-    bool expectingSyn;
 
   public:
     //! \name "Input" interface for the writer
@@ -86,7 +85,7 @@ class TCPConnection {
     //! Construct a new connection from a configuration
     explicit TCPConnection(const TCPConfig &cfg) :
         _cfg{cfg},
-        timeSinceLastSegmentReceived(0), expectingSyn(false){}
+        timeSinceLastSegmentReceived(0){}
 
     //! \name construction and destruction
     //! moving is allowed; copying is disallowed; default construction not possible
@@ -101,6 +100,7 @@ class TCPConnection {
     //!@}
     void set_to_rst();
     TCPSegment generate_rst_segment();
+    void doReset();
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_FACTORED_HH
