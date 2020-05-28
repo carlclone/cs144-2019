@@ -29,7 +29,7 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
     , finSent(false)
     , retxList(capacity)
     , retxTimeout(_initial_retransmission_timeout)
-    , retxTimeLeft(_initial_retransmission_timeout) {}
+    , retxTimePass(0) {}
 
 uint64_t TCPSender::bytes_in_flight() const { return unAckWindowRight - unAckWindowLeft; }
 
@@ -131,7 +131,8 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
         if (expectAbsAckno <= absAck) {
             //                retxList.erase(retxSeg);
             retxSeg = retxList.erase(retxSeg);
-            retxTimeout = retxTimeLeft = _initial_retransmission_timeout;
+            retxTimeout =  _initial_retransmission_timeout;
+            retxTimePass=0;
             consecutiveCount=0;
         }
         retxSeg++;
@@ -156,19 +157,15 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) {
-    if (ms_since_last_tick>retxTimeLeft) {
-        retxTimeLeft=0;
-    } else {
-        retxTimeLeft -= ms_since_last_tick;
-    }
+    retxTimePass += ms_since_last_tick;
 
 
-    if (retxTimeLeft == 0) {
+    if (retxTimePass >=retxTimeout) {
         consecutiveCount++;
         TCPSegment seg = retxList.front();
         segments_out().push(seg);
         retxTimeout*=2;
-        retxTimeLeft = retxTimeout;
+        retxTimePass = 0;
     }
 }
 

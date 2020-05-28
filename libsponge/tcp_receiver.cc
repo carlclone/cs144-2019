@@ -46,14 +46,14 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
     if (header.fin && !fined) {
         fined=true;
         closeInput = true;
-        nextSeqno++;
+
     }
 
     if (data.size()==0) {
 
         if (closeInput) {
             stream_out().end_input();
-
+            nextSeqno++;
         }
 
         return true;
@@ -107,7 +107,7 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
 
         if (closeInput) {
             stream_out().end_input();
-
+            nextSeqno++;
         }
 
         return true;
@@ -119,7 +119,6 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
 
 optional<WrappingInt32> TCPReceiver::ackno() const {
     if (synced) {
-        //return hisIsn + stream_out().bytes_written()+1;
         return wrap(nextSeqno,hisIsn);
     }
     return optional<WrappingInt32>{};

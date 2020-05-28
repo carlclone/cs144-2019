@@ -41,7 +41,7 @@ class TCPSender {
     uint64_t unAckWindowLeft,unAckWindowRight;
     bool syncSent,finSent;
     std::list<TCPSegment> retxList;
-    unsigned int retxTimeout , retxTimeLeft;
+    unsigned int retxTimeout , retxTimePass;
 
   public:
     //! Initialize a TCPSender
