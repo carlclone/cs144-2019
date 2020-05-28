@@ -46,13 +46,14 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
     if (header.fin && !fined) {
         fined=true;
         closeInput = true;
+        nextSeqno++;
     }
 
     if (data.size()==0) {
 
         if (closeInput) {
             stream_out().end_input();
-            nextSeqno+=1;
+
         }
 
         return true;
@@ -106,7 +107,7 @@ bool TCPReceiver::segment_received(const TCPSegment &seg) {
 
         if (closeInput) {
             stream_out().end_input();
-            nextSeqno+=1;
+
         }
 
         return true;

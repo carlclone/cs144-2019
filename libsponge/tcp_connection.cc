@@ -29,13 +29,13 @@ size_t TCPConnection::time_since_last_segment_received() const {
 }
 
 void TCPConnection::segment_received(const TCPSegment &seg) {
+    timeSinceLastSegmentReceived=0;
+
     auto header= seg.header();
     auto payload=seg.payload();
 
     if (state()==TCPState::State::SYN_SENT) {
         if (header.ack && header.ackno!=_sender.next_seqno()) {
-
-
             return;
         }
         if ((header.rst && header.ack)) {
@@ -134,20 +134,21 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      * If there is anackno,1
      * it will set theackflag and the fields in theTCPSegment.
      */
-    std::optional<WrappingInt32> ackno = _receiver.ackno();
+    askReceiver(ongoingSeg);
+
+    segments_out().push(ongoingSeg);
+
+
+}
+void TCPConnection::askReceiver(TCPSegment &ongoingSeg) const {
+    optional<WrappingInt32> ackno = _receiver.ackno();
     if (ackno.has_value()) {
         ongoingSeg.header().ack = true;
         ongoingSeg.header().ackno = ackno.value();
         ongoingSeg.header().win = _receiver.window_size();
 
     }
-
-    segments_out().push(ongoingSeg);
-
-
 }
-
-
 
 /*
  * When this happens, the implementation releases its exclusive claim to a local
@@ -157,9 +158,19 @@ active()
 method return false
  */
 bool TCPConnection::active() const {
+    //unclean shutdown
     if (_sender.stream_in().error() && _receiver.stream_out().error()) {
         return false;
     }
+
+
+    //clean shutdown
+    if ( (_sender.stream_in().eof() && _sender.bytes_in_flight()==0 ) &&
+         (_receiver.stream_out().input_ended()) &&
+         ( _linger_after_streams_finish== false|| time_since_last_segment_received() >= 10* _cfg.rt_timeout) ) {
+        return false;
+    }
+
 
     return true;
 }
@@ -171,13 +182,26 @@ size_t TCPConnection::write(const string &data) {
 
 //! \param[in] ms_since_last_tick number of milliseconds since the last call to this method
 void TCPConnection::tick(const size_t ms_since_last_tick) {
+    timeSinceLastSegmentReceived+=ms_since_last_tick;
+    _sender.tick(ms_since_last_tick);
     if (state()==TCPState::State::ESTABLISHED) {
         _sender.fill_window();
-        while  (_sender.segments_out().size()>0) {
-            auto seg = _sender.segments_out().front();
-            _sender.segments_out().pop();
-            segments_out().push(seg);
+    }
+
+    if (state()==TCPState::State::TIME_WAIT) {
+        if ( (!_receiver.stream_out().input_ended() ) &&
+             ( _linger_after_streams_finish== false|| time_since_last_segment_received() >= 10* _cfg.rt_timeout) ) {
+            //_sender.stream_in().input_ended();
+            _receiver.stream_out().input_ended();
         }
+    }
+
+    while  (_sender.segments_out().size()>0) {
+        auto seg = _sender.segments_out().front();
+
+        _sender.segments_out().pop();
+        askReceiver(seg);
+        segments_out().push(seg);
     }
 
     DUMMY_CODE(ms_since_last_tick);
@@ -190,6 +214,7 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
      * (morethanTCPConfig::MAXRETXATTEMPTS, i.e., 8).
      *
      */
+
     //todo;
 }
 
@@ -197,6 +222,11 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
 
 void TCPConnection::end_input_stream() {
     _sender.stream_in().end_input();
+    _sender.fill_window();
+    auto seg = _sender.segments_out().front();
+    askReceiver(seg);
+    segments_out().push(seg);
+    _sender.segments_out().pop();
 }
 
 void TCPConnection::connect() {

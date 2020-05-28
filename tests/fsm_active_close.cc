@@ -19,6 +19,7 @@ int main() {
 
         // test #1: start in TIME_WAIT, timeout
         {
+            cout << "test1";
             TCPTestHarness test_1 = TCPTestHarness::in_time_wait(cfg);
 
             test_1.execute(Tick(10 * cfg.rt_timeout - 1));
@@ -36,6 +37,7 @@ int main() {
 
         // test #2: start in CLOSING, send ack, time out
         {
+            cout<<"test2";
             TCPTestHarness test_2 = TCPTestHarness::in_closing(cfg);
 
             test_2.execute(Tick(4 * cfg.rt_timeout));
@@ -58,6 +60,7 @@ int main() {
 
         // test #3: start in FIN_WAIT_2, send FIN, time out
         {
+            cout<<"test3";
             TCPTestHarness test_3 = TCPTestHarness::in_fin_wait_2(cfg);
 
             test_3.execute(Tick(4 * cfg.rt_timeout));
@@ -81,6 +84,7 @@ int main() {
 
         // test #4: start in FIN_WAIT_1, ack, FIN, time out
         {
+            cout<<"test4";
             TCPTestHarness test_4 = TCPTestHarness::in_fin_wait_1(cfg);
 
             // Expect retransmission of FIN
@@ -106,6 +110,7 @@ int main() {
 
         // test 5: start in FIN_WAIT_1, ack, FIN, FIN again, time out
         {
+            cout<<"test5";
             TCPTestHarness test_5 = TCPTestHarness::in_fin_wait_1(cfg);
 
             // ACK the FIN
@@ -149,6 +154,7 @@ int main() {
 
         // test 6: start in ESTABLISHED, get FIN, get FIN re-tx, send FIN, get ACK, send ACK, time out
         {
+            cout<<"test6";
             TCPTestHarness test_6 = TCPTestHarness::in_established(cfg);
 
             test_6.execute(Close{});

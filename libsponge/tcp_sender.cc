@@ -156,9 +156,14 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) {
-    retxTimeLeft -= ms_since_last_tick;
+    if (ms_since_last_tick>retxTimeLeft) {
+        retxTimeLeft=0;
+    } else {
+        retxTimeLeft -= ms_since_last_tick;
+    }
 
-    if (retxTimeLeft <= 0) {
+
+    if (retxTimeLeft == 0) {
         consecutiveCount++;
         TCPSegment seg = retxList.front();
         segments_out().push(seg);
