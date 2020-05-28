@@ -30,12 +30,30 @@ size_t TCPConnection::time_since_last_segment_received() const {
 
 void TCPConnection::segment_received(const TCPSegment &seg) {
     auto header= seg.header();
-    auto payload=seg.serialize();
+    auto payload=seg.payload();
 
     if (state()==TCPState::State::SYN_SENT) {
+        if (header.ack && header.ackno!=_sender.next_seqno()) {
+            if (header.rst) {
+                return;
+            }
+            doReset(false);
+            _sender.send_empty_segment();
+            TCPSegment seg1 = _sender.segments_out().front();
+            seg1.header().rst=true;
+            seg1.header().seqno = header.ackno;
+            segments_out().push(seg1);
+            return;
+        }
+        if ((header.rst && header.ack)) {
+            doReset(false);
+            return;
+        }
         if (!header.syn) {
             return;
         }
+
+
     }
     //bool setSyn = false;
     if (state()==TCPState::State::LISTEN) {
@@ -45,6 +63,21 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
         if (header.syn) {
             //setSyn=true;
         }
+        if (header.ack) {
+            doReset();
+            return;
+        }
+    }
+
+
+
+    if (header.rst && header.seqno!=_receiver.ackno()) {
+        return;
+    }
+
+    if (header.rst) {
+        doReset();
+        return;
     }
 
 
@@ -80,7 +113,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 
     recvSuccess = _receiver.segment_received(seg);
 
-    if (ackSuccess && recvSuccess) {
+    if (ackSuccess && recvSuccess && payload.size()==0) {
         return;
     }
 
@@ -130,7 +163,9 @@ active()
 method return false
  */
 bool TCPConnection::active() const {
-
+    if (_sender.stream_in().error() && _receiver.stream_out().error()) {
+        return false;
+    }
 
     return true;
 }
@@ -198,9 +233,17 @@ TCPConnection::~TCPConnection() {
  * and any subsequent call toTCPConnection::active()
  * should return false.
  */
-void TCPConnection::doReset() {
+void TCPConnection::doReset(bool send) {
     _receiver.stream_out().set_error();
     _sender.stream_in().set_error();
+    _linger_after_streams_finish=false;
+    _sender.send_empty_segment();
+    TCPSegment seg = _sender.segments_out().front();
+    seg.header().rst=true;
+    if (send) {
+        segments_out().push(seg);
+    }
+
 
 }
 

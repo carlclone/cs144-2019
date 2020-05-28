@@ -100,7 +100,7 @@ class TCPConnection {
     //!@}
     void set_to_rst();
     TCPSegment generate_rst_segment();
-    void doReset();
+    void doReset(bool sned=true);
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_FACTORED_HH
