@@ -35,15 +35,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
     if (state()==TCPState::State::SYN_SENT) {
         if (header.ack && header.ackno!=_sender.next_seqno()) {
 
-            if (header.rst) {
-                return;
-            }
-            doReset(false);
-            _sender.send_empty_segment();
-            TCPSegment seg1 = _sender.segments_out().front();
-            seg1.header().rst=true;
-            seg1.header().seqno = header.ackno;
-            segments_out().push(seg1);
+
             return;
         }
         if ((header.rst && header.ack)) {
@@ -59,7 +51,6 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
 
     if (state()==TCPState::State::LISTEN) {
         if (header.ack) {
-            doReset();
             return;
         }
         if (!header.syn) {
