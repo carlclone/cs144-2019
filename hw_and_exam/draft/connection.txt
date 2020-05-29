@@ -1,0 +1,10 @@
+func segment_received(seg)
+    if !synSent
+        return
+
+
+func active()
+    if !synSent
+        return false
+
+

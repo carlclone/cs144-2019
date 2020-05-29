@@ -30,6 +30,14 @@ size_t TCPConnection::time_since_last_segment_received() const {
 
 void TCPConnection::segment_received(const TCPSegment &seg) {
     timeSinceLastSegmentReceived=0;
+
+    auto res = _receiver.segment_received(seg);
+    if (res) {
+        _sender.fill_window();
+    }
+    //This flag (“reset”) means instant death to the connection. If you receive a segment
+    //with rst , you should set the error flag on the inbound and outbound ByteStreams,
+    //and any subsequent call to TCPConnection::active() should return false.
     DUMMY_CODE(seg);
 }
 
