@@ -10,6 +10,9 @@ func segment_received(seg)
     if state()==LISTEN && seg.ack.hasValue()
         setToRSTState()
 
+    if state()==SYN_SENT && seqno==nextSeqno
+        setToRSTState()
+
     if state()==SYN_SENT
         return
 
