@@ -1,10 +1,41 @@
+
+property :
+
+
 func segment_received(seg)
-    if !synSent
+    if seg.seqno not in window && seg.rst
+        return
+    if state()==LISTEN && seg.rst
+        return
+    if state()==LISTEN && seg.ack.hasValue()
+        setToRSTState()
+
+    if state()==SYN_SENT
         return
 
 
+
+    //如何处理out of window rst
+    明明sender和receiver已经判断过窗口了
+    还要在外面再判断吗
+
+    //如何处理rst
+    //置为RST需要做什么
+
+
+    segHandleSucc = receiver.segment_received(seg)
+    ackHandleSucc = sender.ack_received(seg.seqno,seg.win_size)
+
+
+
+
+    if seg.dataSize>0 || !ackHandleSucc
+        seg.ack=true
+        seg.ackno = receiver.ackno()
+        seg_out().push(seg);
+
 func active()
-    if !synSent
-        return false
 
 
+func connect()
+    sender.fill_window()

@@ -61,7 +61,7 @@ static void ack_rst_syn_sent_test(const TCPConfig &cfg,
 }
 
 int main() {
-    try {
+    try {//pass
         TCPConfig cfg{};
         const WrappingInt32 base_seq(1 << 31);
 
@@ -116,7 +116,7 @@ int main() {
         }
 
         // test #2: in LISTEN, send RSTs
-        {
+        {//pass
             cerr << "Test 2" << endl;
             TCPTestHarness test_2 = TCPTestHarness::in_listen(cfg);
 
@@ -129,6 +129,7 @@ int main() {
         }
 
         // test 3: ACKs in LISTEN
+        //pass
         cerr << "Test 3" << endl;
         ack_listen_test(cfg, base_seq, base_seq, __LINE__);
         ack_listen_test(cfg, base_seq - 1, base_seq, __LINE__);
@@ -141,6 +142,7 @@ int main() {
         ack_listen_test(cfg, base_seq + cfg.recv_capacity, base_seq + cfg.recv_capacity, __LINE__);
 
         // test 4: ACK and RST in SYN_SENT
+        //
         {
             cerr << "Test 4" << endl;
             TCPTestHarness test_4 = TCPTestHarness::in_syn_sent(cfg, base_seq);

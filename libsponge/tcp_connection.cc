@@ -35,6 +35,7 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
     if (res) {
         _sender.fill_window();
     }
+
     //This flag (“reset”) means instant death to the connection. If you receive a segment
     //with rst , you should set the error flag on the inbound and outbound ByteStreams,
     //and any subsequent call to TCPConnection::active() should return false.
