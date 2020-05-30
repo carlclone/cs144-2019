@@ -24,7 +24,7 @@ int main() {
         // pg 68 of the RFC, I think that it should be.
         //
         // test #1: START -> SYN_SENT -> ACK (ignored) -> SYN -> SYN_RECV
-        {
+        {//pass
             TCPTestHarness test_1(cfg);
 
             // tell the FSM to connect, make sure we get a SYN
@@ -52,7 +52,7 @@ int main() {
         }
 
         // test #2: START -> SYN_SENT -> SYN -> ACK -> ESTABLISHED
-        {
+        {//pass
             TCPTestHarness test_2(cfg);
 
             test_2.execute(Connect{});

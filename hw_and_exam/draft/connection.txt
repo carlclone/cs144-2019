@@ -2,7 +2,28 @@
 property :
 
 
+func connect()
+    sender.fill_window()
+
+
 func segment_received(seg)
+    if seg.ack
+        ackSucc =sender.ack_received(seg.ackno,seg.win_size)
+
+    recvSucc = receiver.seg_received(seg)
+
+    ongoingSeg = stream_out.pop()
+    if !ongoingSeg
+        ongoingSeg = sender.empty_seg()
+
+    ackno = receiver.ackno()
+            if ackno
+                ongoingSeg.acko = ackno
+                ongoingSeg.win_size = receiver.win_size()
+            stream_out.push(ongoingSeg)
+
+
+func segment_received2(seg)
     if seg.seqno not in window && seg.rst
         return
     if state()==LISTEN && seg.rst
@@ -40,5 +61,3 @@ func segment_received(seg)
 func active()
 
 
-func connect()
-    sender.fill_window()
