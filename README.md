@@ -20,13 +20,15 @@
 
 [finite state machine 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=28)
 
+TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
+
 1. fsm是(finite state machine)的缩写,有限状态机
 
 2. 重传列表的问题 , cpp的queue在空的时候也会返回一个默认值 , 需要判断空的情况 , 对语言的库不熟悉,排查了好久 (虽然我觉得为空的时候peek front应该报错)
 
-3. 主动关闭的流程:
+3. 主动关闭才需要linger , 被动关闭不需要 ,被动关闭的判断（inbound在outbound之前关闭)
 
-4. 被动关闭流程:
+4.每次tick timeout都需要重置, 但只有重传的时候才执行exponential backoff
 
 5. 触发RST的场景
 
