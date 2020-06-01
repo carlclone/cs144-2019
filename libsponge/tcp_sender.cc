@@ -159,9 +159,9 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
             TCPSegment seg = retxQueue.front();
             segments_out().push(seg);
             retxTimeout*=2;
-            retxTimePass = 0;
         }
 
+        retxTimePass = 0;
     }
 }
 

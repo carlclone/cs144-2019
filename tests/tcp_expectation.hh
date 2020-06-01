@@ -274,6 +274,10 @@ struct ExpectOneSegment : public ExpectSegment {
     TCPSegment expect_seg(TCPTestHarness &harness) const {
         TCPSegment seg = ExpectSegment::expect_seg(harness);
         if (harness.can_read()) {
+            TCPSegment seg1;
+            if (ParseResult::NoError != seg.parse(harness._flt.read())) {
+                throw SegmentExpectationViolation::violated_verb("was parsable");
+            }
             throw SegmentExpectationViolation("The TCP an extra segment when it should not have");
         }
         return seg;

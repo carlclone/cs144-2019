@@ -97,6 +97,9 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
      */
 
     recvSuccess = _receiver.segment_received(seg);
+    if (_receiver.stream_out().input_ended() && !_sender.stream_in().input_ended()) {
+        endBeforeFin=true;
+    }
 
     if (ackSuccess && recvSuccess
         && seg.length_in_sequence_space()==0
@@ -179,9 +182,8 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
     timeSinceLastSegmentReceived+=ms_since_last_tick;
 
 
-    if (_receiver.stream_out().input_ended()) {
+    if (endBeforeFin) {
         _linger_after_streams_finish=false;
-        return;
     }
 
     /*
@@ -205,6 +207,8 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
 
 
 
+
+
     if (state()==TCPState::State::ESTABLISHED) {
         _sender.fill_window();
     }
@@ -218,8 +222,9 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
         }
     }
 
-    sendOut();
 
+
+    sendOut();
 
 
 
@@ -227,6 +232,11 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
 void TCPConnection::sendOut() {
     while  (!_sender.segments_out().empty()) {
         auto seg = _sender.segments_out().front();
+        if(seg.header().fin) {
+            cout << "sending a fin\n";
+        } else {
+            cout << "sending others\n";
+        }
         _sender.segments_out().pop();
         askReceiver(seg);
         segments_out().push(seg);
@@ -234,7 +244,9 @@ void TCPConnection::sendOut() {
 }
 
 void TCPConnection::end_input_stream() {
+
     _sender.stream_in().end_input();
+
     _sender.fill_window();
     sendOut();
 }
@@ -242,7 +254,7 @@ void TCPConnection::end_input_stream() {
 void TCPConnection::connect() {
     _sender.fill_window();
     sendOut();
-    _linger_after_streams_finish=true;
+//    _linger_after_streams_finish=true;
 }
 
 TCPConnection::~TCPConnection() {
