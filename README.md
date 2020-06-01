@@ -32,6 +32,8 @@
 
 6.linger的判断
 
+7.debug skill++ (ide , gdb断点调试,  取出部分代码块,模拟上下文,然后执行
+
 
 # Lab3 TCPSender
 
