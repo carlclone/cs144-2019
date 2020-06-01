@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <exception>
+#include <iostream>
 #include <optional>
 #include <sstream>
 
@@ -243,6 +244,7 @@ struct ExpectSegment : public TCPExpectation {
             throw SegmentExpectationViolation::violated_field("seqno", seqno.value(), seg.header().seqno);
         }
         if (ackno.has_value() and seg.header().ackno != ackno.value()) {
+            std::cout << seg.header().ackno;
             throw SegmentExpectationViolation::violated_field("ackno", ackno.value(), seg.header().ackno);
         }
         if (win.has_value() and seg.header().win != win.value()) {

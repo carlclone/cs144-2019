@@ -188,10 +188,15 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
      *
      */
 
+    _sender.tick(ms_since_last_tick);
 
-    if (_sender.consecutive_retransmissions() > TCPConfig::MAX_RETX_ATTEMPTS) {
+    if ( _sender.consecutive_retransmissions() > TCPConfig::MAX_RETX_ATTEMPTS) {
         doReset();
+        return;
     }
+
+
+
 
 
     if (state()==TCPState::State::ESTABLISHED) {
@@ -203,6 +208,7 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
              ( _linger_after_streams_finish== false|| time_since_last_segment_received() >= 10* _cfg.rt_timeout) ) {
             //_sender.stream_in().input_ended();
             _receiver.stream_out().input_ended();
+            _linger_after_streams_finish=false;
         }
     }
 
@@ -210,11 +216,11 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
 
 
 
+
 }
 void TCPConnection::sendOut() {
-    while  (_sender.segments_out().size()>0) {
+    while  (!_sender.segments_out().empty()) {
         auto seg = _sender.segments_out().front();
-
         _sender.segments_out().pop();
         askReceiver(seg);
         segments_out().push(seg);
@@ -247,7 +253,7 @@ TCPConnection::~TCPConnection() {
 
 
             // Your code here: need to send a RST segment to the peer
-            doReset();
+            //doReset();
         }
     } catch (const exception &e) {
         std::cerr << "Exception destructing TCP FSM: " << e.what() << std::endl;
@@ -284,7 +290,10 @@ void TCPConnection::doReset(bool send) {
     _linger_after_streams_finish=false;
     _sender.send_empty_segment();
     TCPSegment seg = _sender.segments_out().front();
+    _sender.segments_out().pop();
+    //askReceiver(seg);
     seg.header().rst=true;
+
     if (send) {
         segments_out().push(seg);
     }

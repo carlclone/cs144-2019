@@ -24,10 +24,10 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
     , consecutiveCount(0)
     , hisWindowSize(1)
     , unAckWindowLeft(0)
-    , unAckWindowRight(0)  //无符号数,得把区间定义改成前闭后开了
+    , unAckWindowRight(0)
     , syncSent(false)
     , finSent(false)
-    , retxList(capacity)
+    , retxQueue()
     , retxTimeout(_initial_retransmission_timeout)
     , retxTimePass(0) {}
 
@@ -48,7 +48,7 @@ void TCPSender::fill_window() {
 
         if (seg.length_in_sequence_space()) {
             segments_out().push(seg);
-            retxList.push_front(seg);
+            retxQueue.push(seg);
         }
     } else {
         seg.header().seqno = next_seqno();
@@ -81,7 +81,7 @@ void TCPSender::fill_window() {
 
         if (seg.length_in_sequence_space()) {
             segments_out().push(seg);
-            retxList.push_front(seg);
+            retxQueue.push(seg);
         }
 
         while (stream_in().buffer_size() > 0 && remainWindowSize > 0) {
@@ -99,7 +99,7 @@ void TCPSender::fill_window() {
             unAckWindowRight += minSize;
             if (tmpSeg.length_in_sequence_space()) {
                 segments_out().push(tmpSeg);
-                retxList.push_front(tmpSeg);
+                retxQueue.push(tmpSeg);
             }
         }
 
@@ -122,31 +122,23 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
         return true;
     }
 
-    /*
-     * maintain retxList
-     */
-    auto retxSeg = retxList.begin();
-    while (retxSeg != retxList.end()) {
-        auto expectAbsAckno = unwrap(retxSeg->header().seqno, _isn, next_seqno_absolute()) + retxSeg->length_in_sequence_space();
+
+    while (!retxQueue.empty()) {
+        auto retxSeg = retxQueue.front();
+        auto expectAbsAckno = unwrap(retxSeg.header().seqno, _isn, next_seqno_absolute()) + retxSeg.length_in_sequence_space();
         if (expectAbsAckno <= absAck) {
-            //                retxList.erase(retxSeg);
-            retxSeg = retxList.erase(retxSeg);
+            retxQueue.pop();
             retxTimeout =  _initial_retransmission_timeout;
             retxTimePass=0;
             consecutiveCount=0;
+        } else {
+            break;
         }
-        retxSeg++;
     }
 
-    /*
-     * 维护未 ack 窗口
-     */
     unAckWindowLeft = min(unAckWindowRight, absAck);
 
-    /*
-     * 重传相关
-     */
-    // do sth...
+
 
     if (absAck > next_seqno_absolute()) {
         return false;
@@ -159,13 +151,15 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 void TCPSender::tick(const size_t ms_since_last_tick) {
     retxTimePass += ms_since_last_tick;
 
+    if (retxTimePass >=retxTimeout) {
+        if (!retxQueue.empty()) {
+            consecutiveCount++;
+            TCPSegment seg = retxQueue.front();
+            segments_out().push(seg);
+            retxTimeout*=2;
+            retxTimePass = 0;
+        }
 
-    if (retxTimePass >retxTimeout) {
-        consecutiveCount++;
-        TCPSegment seg = retxList.front();
-        segments_out().push(seg);
-        retxTimeout*=2;
-        retxTimePass = 0;
     }
 }
 

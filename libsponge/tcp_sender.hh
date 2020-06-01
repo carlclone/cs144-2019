@@ -33,14 +33,14 @@ class TCPSender {
     /*
      * absSeqno  0    1    2  3
      * seqno    isn isn+1 +2 +3...
-     * 真想改个变量名,和我的思路冲突了 , 那我就用 abs 的吧
+     *
      */
     uint64_t _next_seqno{0};
 
     unsigned int consecutiveCount , hisWindowSize;
     uint64_t unAckWindowLeft,unAckWindowRight;
     bool syncSent,finSent;
-    std::list<TCPSegment> retxList;
+    std::queue<TCPSegment> retxQueue;
     unsigned int retxTimeout , retxTimePass;
 
   public:
