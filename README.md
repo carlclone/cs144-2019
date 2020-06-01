@@ -20,6 +20,9 @@
 
 [finite state machine 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=28)
 
+
+```
+
 TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 
 1. fsm是(finite state machine)的缩写,有限状态机
@@ -35,7 +38,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 6.linger的判断
 
 7.debug skill++ (ide , gdb断点调试,  取出部分代码块,模拟上下文,然后执行
-
+```
 
 # Lab3 TCPSender
 
@@ -47,6 +50,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 
 [guide](https://cs144.github.io/assignments/lab3.pdf)
 
+```
 1.超时机制是 exponential backoff , 指数补偿
 
 2.下一个 lab 还是多写点 helper 吧
@@ -62,7 +66,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 7.前闭后开区间的意义: unsigned int 不能为负值,前闭后开可以定义大小为 0 的区间
 
 8.初始 windowSize 为 1 (发 syn)
-
+```
 
 
 
@@ -78,6 +82,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 
 [sliding window 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=33)
 
+```
 1.实现对 syn,fin,和带data 的 tcp segment 的接收,处理和响应
 
 2.看着 test case 写了第一版 pesudo code, 然后直接在 pesudo code 上重构了一版,以窗口为模型,截取在窗口内的字节流
@@ -95,7 +100,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 8.还没找到这套测试框架打印数据的方法
 
 9.写入 Reassembler 的时候要用absolute index, 从 0 开始的,不计算 syn 位的索引
-
+```
 
 # Lab1 StreamReassembler
 
@@ -107,6 +112,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 
 [guide](https://cs144.github.io/assignments/lab1.pdf)
 
+```
 1.lab1用了5，6个小时的时间才做完，测试用例有点难度
 
 2.实现的是`TCP`的一个组件，重新组装segment成为连续的字节流，提供给上层应用
@@ -124,7 +130,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 8.maybe multiple eof , so need to store every eof state
 
 9 imple an out of order , repeat, overlapping , increment update , reliable reassembler
-
+```
 
 
 # Lab0 ByteStream
@@ -137,6 +143,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 
 [guide](https://cs144.github.io/assignments/lab0.pdf)
 
+```
 1.实现了一个`in-memory reliable ordered bystream`,做这个的目的是因为`tcp`实际上就是这样的一个可靠有序的字节流,不过是基于网络的,
 实现这一个小`lab`可以更好地理解了`tc`p两端的一些交互,
 比如说`http`的请求中,客户端发送完请求后会向服务端发送一个`SHUTDOWN_WRITE`的 信号,
@@ -145,7 +152,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 这里的`seq number`就可以用作`eof`的判断
 
 2.`webget`这个`task`用课程提供的虚拟镜像运行不了,折腾了好久,放到自己的`ubuntu16.04`里成功运行,越底层的语言开发环境越折磨人
-
+```
 
 
 
