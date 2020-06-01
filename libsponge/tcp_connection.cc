@@ -178,6 +178,12 @@ void TCPConnection::print() {
 void TCPConnection::tick(const size_t ms_since_last_tick) {
     timeSinceLastSegmentReceived+=ms_since_last_tick;
 
+
+    if (_receiver.stream_out().input_ended()) {
+        _linger_after_streams_finish=false;
+        return;
+    }
+
     /*
      * there are two situations where you’ll want to abort the entire
      * connection:
