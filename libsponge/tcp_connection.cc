@@ -271,7 +271,7 @@ TCPConnection::~TCPConnection() {
 
 
             // Your code here: need to send a RST segment to the peer
-            //doReset();
+            doReset();
         }
     } catch (const exception &e) {
         std::cerr << "Exception destructing TCP FSM: " << e.what() << std::endl;

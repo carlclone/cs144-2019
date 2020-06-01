@@ -50,6 +50,7 @@ int main() {
 
             test_2.execute(Tick(cfg.rt_timeout - 2));
 
+
             test_2.execute(ExpectNoSegment{}, "test 2 failed: FIN re-tx was too fast");
 
             test_2.execute(Tick(2));
