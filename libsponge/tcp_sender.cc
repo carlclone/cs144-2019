@@ -118,10 +118,6 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     auto absAck = unwrap(ackno, _isn, next_seqno_absolute());
 
     hisWindowSize = window_size;
-    if (absAck < next_seqno_absolute()) {
-        return true;
-    }
-
 
     while (!retxQueue.empty()) {
         auto retxSeg = retxQueue.front();
@@ -135,6 +131,12 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
             break;
         }
     }
+    if (absAck < next_seqno_absolute()) {
+        return true;
+    }
+
+
+
 
     unAckWindowLeft = min(unAckWindowRight, absAck);
 
