@@ -16,6 +16,8 @@
 
 # Lab4 TCPConnection
 
+2020/05/28 ~ 06/01
+
 [guide](https://cs144.github.io/assignments/lab4.pdf)
 
 [finite state machine 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=28)
