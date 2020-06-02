@@ -63,6 +63,9 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 
 ![](https://github.com/carlclone/CS144/blob/master/hw_and_exam/imgs/tcp-state.jpg)
 
+> https://blog.csdn.net/wuji0447/article/details/78356875
+
+![](https://github.com/carlclone/CS144/blob/master/hw_and_exam/imgs/close.jpg)
 
 
 # Lab3 TCPSender
