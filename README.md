@@ -47,6 +47,10 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 7.debug skill++ (ide断点, 还是没有打log好用)
 ```
 
+### 关于连接关闭
+
+由于["Two General's Problem'](https://en.wikipedia.org/wiki/Two_Generals%27_Problem) , clean shutdown是不可能实现的一个目标 , 但tcp使用了一个非常接近的实现 , 在送出最后一个ack之后等待10*rt_timeout,如果对端没有重传,则假设达成了clean shutdown
+
 ### 重要的图示
 
 ```
