@@ -34,7 +34,7 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 
 1. fsm是(finite state machine)的缩写,有限状态机
 
-2. 重传列表的问题 , cpp的queue在空的时候也会返回一个默认值 , 需要判断空的情况 , 对语言的库不熟悉,排查了好久 (虽然我觉得为空的时候peek front应该报错)
+2. 重传列表的问题 , cpp的queue在空的时候也会返回一个默认值 , 需要判断空的情况 , 对语言的库不熟悉,排查了好久,之后都要当心为空返回默认值的情况 (虽然我觉得为空的时候peek front应该报错)
 
 3. 主动关闭才需要linger , 被动关闭不需要 ,被动关闭的判断（inbound在outbound之前关闭)
 
