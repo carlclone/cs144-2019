@@ -28,6 +28,21 @@
 
 [finite state machine 视频讲解](https://www.bilibili.com/video/BV137411Z7LR?p=28)
 
+### 重要的图示
+
+> https://cs144.github.io/lab_faq.html
+
+![](https://github.com/carlclone/CS144/blob/master/hw_and_exam/imgs/receiver-evolution.svg)
+
+![](https://github.com/carlclone/CS144/blob/master/hw_and_exam/imgs/sender-evolution.svg)
+
+> https://cs144.github.io/assignments/lab4.pdf
+
+![](https://github.com/carlclone/CS144/blob/master/hw_and_exam/imgs/tcp-connection.jpg)
+
+> https://www.bilibili.com/video/BV137411Z7LR?p=28
+
+![](https://github.com/carlclone/CS144/blob/master/hw_and_exam/imgs/tcp-state.jpg)
 
 ```
 
