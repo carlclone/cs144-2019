@@ -9,6 +9,31 @@
 #include <functional>
 #include <queue>
 
+class Timer {
+private:
+    size_t timePass,deadLine;
+public:
+    Timer(size_t dl):timePass(0),deadLine(dl) {}
+
+    void tick(size_t ms_since_last_tick) {
+        timePass+=ms_since_last_tick;
+    }
+
+    bool reachDeadLine() {
+        return timePass>=deadLine;
+    }
+    void restart() {
+        timePass=0;
+    }
+    void exponentialBackOff() {
+        deadLine*=2;
+    }
+    void setDeadLine(size_t dl) {
+        deadLine=dl;
+    }
+};
+
+
 //! \brief The "sender" part of a TCP implementation.
 
 //! Accepts a ByteStream, divides it up into segments and sends the
@@ -41,7 +66,8 @@ class TCPSender {
     uint64_t unAckWindowLeft,unAckWindowRight;
     bool syncSent,finSent;
     std::queue<TCPSegment> retxQueue;
-    unsigned int retxTimeout , retxTimePass;
+
+    Timer timer;
 
   public:
     //! Initialize a TCPSender

@@ -28,8 +28,7 @@ TCPSender::TCPSender(const size_t capacity, const uint16_t retx_timeout, const s
     , syncSent(false)
     , finSent(false)
     , retxQueue()
-    , retxTimeout(_initial_retransmission_timeout)
-    , retxTimePass(0) {}
+    , timer(_initial_retransmission_timeout){}
 
 uint64_t TCPSender::bytes_in_flight() const { return unAckWindowRight - unAckWindowLeft; }
 
@@ -124,8 +123,8 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
         auto expectAbsAckno = unwrap(retxSeg.header().seqno, _isn, next_seqno_absolute()) + retxSeg.length_in_sequence_space();
         if (expectAbsAckno <= absAck) {
             retxQueue.pop();
-            retxTimeout =  _initial_retransmission_timeout;
-            retxTimePass=0;
+            timer.setDeadLine(_initial_retransmission_timeout);
+            timer.restart();
             consecutiveCount=0;
         } else {
             break;
@@ -151,17 +150,16 @@ bool TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) {
-    retxTimePass += ms_since_last_tick;
+    timer.tick(ms_since_last_tick);
 
-    if (retxTimePass >=retxTimeout) {
+    if (timer.reachDeadLine()) {
         if (!retxQueue.empty()) {
             consecutiveCount++;
             TCPSegment seg = retxQueue.front();
             segments_out().push(seg);
-            retxTimeout*=2;
+            timer.exponentialBackOff();
         }
-
-        retxTimePass = 0;
+        timer.restart();
     }
 }
 
