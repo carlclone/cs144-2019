@@ -1,7 +1,7 @@
 
-- [x] Lab0 webget,ByteStream
+- [x] Lab0 Webget / ByteStream
 
-- [x] Lab1 StreamReassembler
+- [x] Lab1 Stream Reassembler
 
 - [x] Lab2 TCP Receiver
 
