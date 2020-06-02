@@ -49,6 +49,68 @@ TCP协议的Lab告一段落,后面的是发送EthernetFrame和Router的lab
 
 ### 重要的图示
 
+```
+connection 和 receiver/sender对应的state
+
+switch (state) {
+        case TCPState::State::LISTEN:
+            _receiver = TCPReceiverStateSummary::LISTEN;
+            _sender = TCPSenderStateSummary::CLOSED;
+            break;
+        case TCPState::State::SYN_RCVD:
+            _receiver = TCPReceiverStateSummary::SYN_RECV;
+            _sender = TCPSenderStateSummary::SYN_SENT;
+            break;
+        case TCPState::State::SYN_SENT:
+            _receiver = TCPReceiverStateSummary::LISTEN;
+            _sender = TCPSenderStateSummary::SYN_SENT;
+            break;
+        case TCPState::State::ESTABLISHED:
+            _receiver = TCPReceiverStateSummary::SYN_RECV;
+            _sender = TCPSenderStateSummary::SYN_ACKED;
+            break;
+        case TCPState::State::CLOSE_WAIT:
+            _receiver = TCPReceiverStateSummary::FIN_RECV;
+            _sender = TCPSenderStateSummary::SYN_ACKED;
+            _linger_after_streams_finish = false;
+            break;
+        case TCPState::State::LAST_ACK:
+            _receiver = TCPReceiverStateSummary::FIN_RECV;
+            _sender = TCPSenderStateSummary::FIN_SENT;
+            _linger_after_streams_finish = false;
+            break;
+        case TCPState::State::CLOSING:
+            _receiver = TCPReceiverStateSummary::FIN_RECV;
+            _sender = TCPSenderStateSummary::FIN_SENT;
+            break;
+        case TCPState::State::FIN_WAIT_1:
+            _receiver = TCPReceiverStateSummary::SYN_RECV;
+            _sender = TCPSenderStateSummary::FIN_SENT;
+            break;
+        case TCPState::State::FIN_WAIT_2:
+            _receiver = TCPReceiverStateSummary::SYN_RECV;
+            _sender = TCPSenderStateSummary::FIN_ACKED;
+            break;
+        case TCPState::State::TIME_WAIT:
+            _receiver = TCPReceiverStateSummary::FIN_RECV;
+            _sender = TCPSenderStateSummary::FIN_ACKED;
+            break;
+        case TCPState::State::RESET:
+            _receiver = TCPReceiverStateSummary::ERROR;
+            _sender = TCPSenderStateSummary::ERROR;
+            _linger_after_streams_finish = false;
+            _active = false;
+            break;
+        case TCPState::State::CLOSED:
+            _receiver = TCPReceiverStateSummary::FIN_RECV;
+            _sender = TCPSenderStateSummary::FIN_ACKED;
+            _linger_after_streams_finish = false;
+            _active = false;
+            break;
+    }
+
+```
+
 > https://cs144.github.io/lab_faq.html
 
 ![](https://github.com/carlclone/CS144/blob/master/hw_and_exam/imgs/receiver-evolution.svg)
