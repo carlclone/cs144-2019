@@ -39,32 +39,32 @@ void get_URL(const string &host, const string &path) {
 
     //实现webget ,  HTTP请求体的格式 , TCPSocket , Address class , 每行结束\r\n
     //构建http请求体
-    std::string httpString;
-    httpString = "GET "+path+" HTTP/1.0" +"\r\n" +
-                 "Host:"+host +"\r\n";
-    cout <<httpString;
-
-
-    //建立tcp连接
-    TCPSocket tcpSocket = TCPSocket{};
-    Address address = Address{host, "http"};
-    tcpSocket.connect(address);
-
-
-    //发送(write)字节流
-    // write完之后要调用TCPSocket的SHUT WR关掉这个方向的发送 , 否则另一端会等待一段时间才开始处理
-    tcpSocket.write(httpString);
-    tcpSocket.shutdown(SHUT_WR);
-
-    //接收(read)字节流
-    // read要read到EOF才算结束 , 不能只read一次
-    //eof是一个信号,不是字符串结尾的特殊字符
-    string bytes;
-    while (!tcpSocket.eof()) {
-        bytes += tcpSocket.read();
-    }
-    cout << bytes;
-    tcpSocket.close();
+//    std::string httpString;
+//    httpString = "GET "+path+" HTTP/1.0" +"\r\n" +
+//                 "Host:"+host +"\r\n";
+//    cout <<httpString;
+//
+//
+//    //建立tcp连接
+//    TCPSocket tcpSocket = TCPSocket{};
+//    Address address = Address{host, "http"};
+//    tcpSocket.connect(address);
+//
+//
+//    //发送(write)字节流
+//    // write完之后要调用TCPSocket的SHUT WR关掉这个方向的发送 , 否则另一端会等待一段时间才开始处理
+//    tcpSocket.write(httpString);
+//    tcpSocket.shutdown(SHUT_WR);
+//
+//    //接收(read)字节流
+//    // read要read到EOF才算结束 , 不能只read一次
+//    //eof是一个信号,不是字符串结尾的特殊字符
+//    string bytes;
+//    while (!tcpSocket.eof()) {
+//        bytes += tcpSocket.read();
+//    }
+//    cout << bytes;
+//    tcpSocket.close();
 
 //    cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
 //    cerr << "Warning: get_URL() has not been implemented yet.\n";
