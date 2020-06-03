@@ -35,7 +35,7 @@ void get_URL(const string &host, const string &path) {
     //实现webget ,  HTTP请求体的格式 , TCPSocket , Address class , 每行结束\r\n
     //构建http请求体
     std::string httpString;
-    httpString = "GET "+path+" HTTP/1.0" +"\r\n" +
+    httpString = "GET "+path+" HTTP/1.1" +"\r\n" +
                  "Host:"+host +"\r\n";
     cout <<httpString;
 
