@@ -232,11 +232,11 @@ void TCPConnection::tick(const size_t ms_since_last_tick) {
 void TCPConnection::sendOut() {
     while  (!_sender.segments_out().empty()) {
         auto seg = _sender.segments_out().front();
-        if(seg.header().fin) {
-            cout << "sending a fin\n";
-        } else {
-            cout << "sending others\n";
-        }
+//        if(seg.header().fin) {
+//            cout << "sending a fin\n";
+//        } else {
+//            cout << "sending others\n";
+//        }
         _sender.segments_out().pop();
         askReceiver(seg);
         segments_out().push(seg);
