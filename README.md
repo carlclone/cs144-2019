@@ -9,15 +9,22 @@
 
 - [x] Lab4 TCP Connection
 
-~-  Lab5 NetWork Interface~
+- [ ] Lab5 Network Interface
 
-~-  Lab6 Router~
+- [ ] Lab6 Router
 
 # 材料
 
 [schedule 2019](https://cs144.github.io/)
 
 [cs144视频 2013](https://www.bilibili.com/video/BV137411Z7LR?from=search&seid=14214950455188752553)
+
+
+# Lab5 Network Interface
+
+[RFC826 - ARP](https://tools.ietf.org/html/rfc826)
+[Wiki - ARP](https://en.wikipedia.org/wiki/Address_Resolution_Protocol)
+[Guide](https://cs144.github.io/assignments/lab5.pdf)
 
 
 # Lab4 TCPConnection
